@@ -103,7 +103,7 @@ export function canonicalCellHash(cell: NotebookCell): string {
  * - Different notebooks or positions get different IDs
  * - Content changes result in different IDs (intentional for change detection)
  *
- * Generated IDs use format: "vibesci-{8-char-hex}"
+ * Generated IDs use format: "gyoshu-{8-char-hex}"
  *
  * @param cell - The notebook cell (modified in place if ID is added)
  * @param index - Zero-based index of the cell in the notebook
@@ -126,7 +126,7 @@ export function ensureCellId(cell: NotebookCell, index: number, notebookPath: st
   const combined = `${notebookPath}:${index}:${contentHash}`;
   const hash = crypto.createHash('sha256').update(combined).digest('hex').slice(0, 8);
 
-  const newId = `vibesci-${hash}`;
+  const newId = `gyoshu-${hash}`;
   cell.id = newId;
   return newId;
 }

@@ -170,7 +170,7 @@ describe('ensureCellId', () => {
 
     const id = ensureCellId(cell, 0, '/path/notebook.ipynb');
 
-    expect(id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+    expect(id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
     expect(cell.id).toBe(id);
   });
 
@@ -253,7 +253,7 @@ describe('ensureCellId', () => {
     ensureCellId(cell, 0, '/path/notebook.ipynb');
 
     expect(cell.id).toBeDefined();
-    expect(cell.id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+    expect(cell.id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
   });
 });
 
@@ -273,9 +273,9 @@ describe('migrateNotebookCellIds', () => {
     const result = migrateNotebookCellIds(notebook, '/path/notebook.ipynb');
 
     expect(result.migrated).toBe(3);
-    expect(notebook.cells[0].id).toMatch(/^vibesci-[a-f0-9]{8}$/);
-    expect(notebook.cells[1].id).toMatch(/^vibesci-[a-f0-9]{8}$/);
-    expect(notebook.cells[2].id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+    expect(notebook.cells[0].id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
+    expect(notebook.cells[1].id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
+    expect(notebook.cells[2].id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
   });
 
   test('skips cells with existing IDs', () => {
@@ -294,7 +294,7 @@ describe('migrateNotebookCellIds', () => {
 
     expect(result.migrated).toBe(1);
     expect(notebook.cells[0].id).toBe('existing-1');
-    expect(notebook.cells[1].id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+    expect(notebook.cells[1].id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
     expect(notebook.cells[2].id).toBe('existing-2');
   });
 
@@ -412,7 +412,7 @@ describe('migrateNotebookCellIds', () => {
     const result = migrateNotebookCellIds(notebook, '/path/notebook.ipynb');
 
     expect(result.migrated).toBe(1);
-    expect(notebook.cells[0].id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+    expect(notebook.cells[0].id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
   });
 
   test('produces deterministic IDs across migrations', () => {
@@ -460,7 +460,7 @@ describe('migrateNotebookCellIds', () => {
 
     expect(result.migrated).toBe(4);
     notebook.cells.forEach(cell => {
-      expect(cell.id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+      expect(cell.id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
     });
   });
 });
@@ -477,7 +477,7 @@ describe('edge cases', () => {
     expect(hash).toMatch(/^sha256:[a-f0-9]{64}$/);
 
     const id = ensureCellId(cell, 0, '/path/notebook.ipynb');
-    expect(id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+    expect(id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
   });
 
   test('handles source with only whitespace', () => {
@@ -497,7 +497,7 @@ describe('edge cases', () => {
     };
 
     const id = ensureCellId(cell, 0, '/path/with spaces/and-dashes/notebook (1).ipynb');
-    expect(id).toMatch(/^vibesci-[a-f0-9]{8}$/);
+    expect(id).toMatch(/^gyoshu-[a-f0-9]{8}$/);
   });
 
   test('handles empty array source', () => {

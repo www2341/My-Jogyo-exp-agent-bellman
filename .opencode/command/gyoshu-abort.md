@@ -1,6 +1,6 @@
 ---
 description: Gracefully abort current research with state preservation
-agent: vibesci-planner
+agent: gyoshu
 ---
 
 Abort the research session: $ARGUMENTS
@@ -19,12 +19,12 @@ If no session ID is provided, aborts the currently active session.
 The aborted session can be resumed later using:
 
 ```
-/vibesci-continue [session_id]
+/gyoshu-continue [session_id]
 ```
 
 All preserved state will be available when resuming.
 
-## Difference from /vibesci-unlock
+## Difference from /gyoshu-unlock
 
 - **abort**: Gracefully stop research you want to pause or cancel
 - **unlock**: Fix stuck sessions after crashes (forces lock release)

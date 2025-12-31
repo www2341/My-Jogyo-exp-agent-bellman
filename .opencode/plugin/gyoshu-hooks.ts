@@ -22,7 +22,7 @@ const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 const IDLE_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
 function getSessionsDir(): string {
-  return path.join(os.homedir(), ".vibesci", "sessions");
+  return path.join(os.homedir(), ".gyoshu", "sessions");
 }
 
 function getBridgeMetaPath(sessionId: string): string {
@@ -53,7 +53,7 @@ function killBridge(sessionId: string): void {
   if (!meta) return;
   
   if (isProcessAlive(meta.pid)) {
-    console.log(`[VibeSci] Killing bridge for session ${sessionId}: PID=${meta.pid}`);
+    console.log(`[Gyoshu] Killing bridge for session ${sessionId}: PID=${meta.pid}`);
     try {
       process.kill(meta.pid, "SIGTERM");
     } catch {}
@@ -76,7 +76,7 @@ function cleanupAllBridges(): void {
       killBridge(sessionId);
     }
   } catch (e) {
-    console.error("[VibeSci] Error cleaning up bridges:", e);
+    console.error("[Gyoshu] Error cleaning up bridges:", e);
   }
 }
 
@@ -87,7 +87,7 @@ function killIdleBridges(): void {
     if (now - session.lastActivity > IDLE_TIMEOUT_MS) {
       const meta = readBridgeMeta(sessionId);
       if (meta && isProcessAlive(meta.pid)) {
-        console.log(`[VibeSci] Session ${sessionId} idle for 30+ minutes, killing bridge`);
+        console.log(`[Gyoshu] Session ${sessionId} idle for 30+ minutes, killing bridge`);
         killBridge(sessionId);
         session.status = "terminated";
       }
@@ -97,8 +97,8 @@ function killIdleBridges(): void {
 
 let idleCheckInterval: NodeJS.Timeout | null = null;
 
-export const VibeSciPlugin: Plugin = async ({ project, client, $, directory }) => {
-  console.log("[VibeSci] Plugin initialized");
+export const GyoshuPlugin: Plugin = async ({ project, client, $, directory }) => {
+  console.log("[Gyoshu] Plugin initialized");
   
   idleCheckInterval = setInterval(killIdleBridges, IDLE_CHECK_INTERVAL_MS);
   
@@ -128,13 +128,13 @@ export const VibeSciPlugin: Plugin = async ({ project, client, $, directory }) =
     
     event: async ({ event }) => {
       if (event.type === "session.end") {
-        console.log("[VibeSci] OpenCode session ending, cleaning up bridges...");
+        console.log("[Gyoshu] OpenCode session ending, cleaning up bridges...");
         cleanupAllBridges();
       }
     },
     
     cleanup: async () => {
-      console.log("[VibeSci] Plugin cleanup - stopping idle checker and killing bridges");
+      console.log("[Gyoshu] Plugin cleanup - stopping idle checker and killing bridges");
       
       if (idleCheckInterval) {
         clearInterval(idleCheckInterval);
@@ -147,4 +147,4 @@ export const VibeSciPlugin: Plugin = async ({ project, client, $, directory }) =
   };
 };
 
-export default VibeSciPlugin;
+export default GyoshuPlugin;

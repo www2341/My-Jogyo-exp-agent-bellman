@@ -1,6 +1,6 @@
 ---
 description: Start user-guided research with single-cycle control
-agent: vibesci-planner
+agent: gyoshu
 ---
 
 Start an INTERACTIVE research session for the following goal:
@@ -11,7 +11,7 @@ $ARGUMENTS
 
 This command runs in **PLANNER mode** - single-cycle, user-guided execution that:
 1. Creates or continues a session in interactive mode
-2. Executes ONE research cycle: delegate to @vibesci → verify results → report back
+2. Executes ONE research cycle: delegate to @jogyo → verify results → report back
 3. Returns control to you with findings and options for next steps
 
 ## User Control
@@ -27,7 +27,7 @@ After each cycle, you will receive:
 
 ## When to Use PLANNER Mode
 
-Choose `/vibesci-interactive` when you want:
+Choose `/gyoshu-interactive` when you want:
 - **Fine-grained control** over each research step
 - **Opportunity to adjust** direction based on intermediate findings
 - **Learning experience** to understand the research process
@@ -36,14 +36,14 @@ Choose `/vibesci-interactive` when you want:
 ## Example Usage
 
 ```
-/vibesci-interactive explore correlation between temperature and sales
-/vibesci-interactive investigate outliers in the customer dataset
-/vibesci-interactive validate the hypothesis that feature X predicts Y
+/gyoshu-interactive explore correlation between temperature and sales
+/gyoshu-interactive investigate outliers in the customer dataset
+/gyoshu-interactive validate the hypothesis that feature X predicts Y
 ```
 
 ## Comparison with AUTO Mode
 
-| Aspect | PLANNER (this command) | AUTO (`/vibesci-auto`) |
+| Aspect | PLANNER (this command) | AUTO (`/gyoshu-auto`) |
 |--------|------------------------|------------------------|
 | Cycles | Single, then user input | Multiple, bounded loop |
 | Control | User-guided each step | Autonomous until goal/budget |

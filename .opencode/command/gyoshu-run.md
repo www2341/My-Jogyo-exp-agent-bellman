@@ -1,6 +1,6 @@
 ---
-description: Start a new VibeSci research session
-agent: vibesci-planner
+description: Start a new Gyoshu research session
+agent: gyoshu
 ---
 
 Start a NEW research session for:
@@ -14,4 +14,4 @@ This will:
 
 Previous session data will NOT be used.
 
-> **Note:** This starts an interactive session where you guide the research. For fully autonomous research, use `/vibesci-auto` instead.
+> **Note:** This starts an interactive session where you guide the research. For fully autonomous research, use `/gyoshu-auto` instead.

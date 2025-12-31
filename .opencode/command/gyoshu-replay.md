@@ -1,6 +1,6 @@
 ---
-description: Replay a VibeSci session for reproducibility
-agent: vibesci-planner
+description: Replay a Gyoshu session for reproducibility
+agent: gyoshu
 ---
 
 Replay session: $ARGUMENTS

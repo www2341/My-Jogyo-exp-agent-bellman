@@ -1,10 +1,10 @@
-# AGENTS.md - VibeSci Repository Guide
+# AGENTS.md - Gyoshu Repository Guide
 
 > Guidelines for AI agents operating in this repository.
 
 ## Overview
 
-VibeSci is a scientific research agent extension for OpenCode. It provides:
+Gyoshu is a scientific research agent extension for OpenCode. It provides:
 - Persistent Python REPL with structured output markers
 - Jupyter notebook integration for reproducible research
 - Session management for research workflows
@@ -65,7 +65,7 @@ import json
 import pytest
 
 # Local imports last (blank line)
-from vibesci_bridge import parse_markers, execute_code
+from gyoshu_bridge import parse_markers, execute_code
 ```
 
 #### Type Hints (Required)
@@ -143,7 +143,7 @@ import { durableAtomicWrite, fileExists } from "../lib/atomic-write";
 #### JSDoc Comments
 ```typescript
 /**
- * Session Manager - OpenCode tool for managing VibeSci research sessions
+ * Session Manager - OpenCode tool for managing Gyoshu research sessions
  *
  * Provides CRUD operations for session manifests with:
  * - Atomic, durable writes to prevent data corruption
@@ -153,10 +153,10 @@ import { durableAtomicWrite, fileExists } from "../lib/atomic-write";
  */
 
 /**
- * Root directory for all VibeSci session data.
+ * Root directory for all Gyoshu session data.
  * Located in user's home directory for privacy and persistence.
  */
-const SESSIONS_DIR = path.join(os.homedir(), ".vibesci", "sessions");
+const SESSIONS_DIR = path.join(os.homedir(), ".gyoshu", "sessions");
 ```
 
 #### Interfaces and Types
@@ -204,7 +204,7 @@ class TestModuleName:
 
 ## Structured Output Markers
 
-When working with VibeSci REPL output, use these markers:
+When working with Gyoshu REPL output, use these markers:
 
 ```python
 # Research Process
@@ -228,10 +228,10 @@ print("[PATTERN] Identified pattern")
 ## Project Structure
 
 ```
-VibeSci/
+Gyoshu/
 ├── .opencode/              # OpenCode extension
 │   ├── agent/              # Agent definitions
-│   ├── command/            # Slash commands (/vibesci-run, etc.)
+│   ├── command/            # Slash commands (/gyoshu-run, etc.)
 │   ├── tool/               # Tool implementations (*.ts)
 │   ├── lib/                # Shared utilities
 │   ├── bridge/             # Python REPL bridge
@@ -246,7 +246,7 @@ VibeSci/
 
 | File | Purpose |
 |------|---------|
-| `.opencode/bridge/vibesci_bridge.py` | JSON-RPC Python execution bridge |
+| `.opencode/bridge/gyoshu_bridge.py` | JSON-RPC Python execution bridge |
 | `.opencode/tool/session-manager.ts` | Session CRUD operations |
 | `.opencode/tool/python-repl.ts` | REPL tool interface |
 | `.opencode/tool/notebook-writer.ts` | Jupyter notebook generation |
@@ -260,12 +260,12 @@ VibeSci/
 3. Run: `pytest tests/test_file.py::TestClass::test_method -v`
 
 ### Modifying the Python Bridge
-1. Edit `.opencode/bridge/vibesci_bridge.py`
+1. Edit `.opencode/bridge/gyoshu_bridge.py`
 2. Run tests: `pytest tests/test_bridge.py -v`
 3. Test manually with JSON-RPC messages
 
 ### Working with Sessions
-Sessions are stored at `~/.vibesci/sessions/{sessionId}/`:
+Sessions are stored at `~/.gyoshu/sessions/{sessionId}/`:
 - `manifest.json` - Session metadata
 - `notebook.ipynb` - Jupyter notebook
 - `artifacts/` - Generated files

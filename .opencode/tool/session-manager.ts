@@ -1,5 +1,5 @@
 /**
- * Session Manager - OpenCode tool for managing VibeSci research sessions
+ * Session Manager - OpenCode tool for managing Gyoshu research sessions
  *
  * Provides CRUD operations for session manifests with:
  * - Atomic, durable writes to prevent data corruption
@@ -17,10 +17,10 @@ import * as os from "os";
 import { durableAtomicWrite, fileExists, readFile } from "../lib/atomic-write";
 
 /**
- * Root directory for all VibeSci session data.
+ * Root directory for all Gyoshu session data.
  * Located in user's home directory for privacy and persistence.
  */
-const SESSIONS_DIR = path.join(os.homedir(), ".vibesci", "sessions");
+const SESSIONS_DIR = path.join(os.homedir(), ".gyoshu", "sessions");
 
 /**
  * Environment metadata captured for reproducibility.
@@ -83,7 +83,7 @@ interface SessionBudgets {
 
 /**
  * Complete session manifest structure.
- * Stored as JSON in ~/.vibesci/sessions/{researchSessionID}/manifest.json
+ * Stored as JSON in ~/.gyoshu/sessions/{researchSessionID}/manifest.json
  */
 interface SessionManifest {
   /** Unique identifier for this research session */
@@ -217,7 +217,7 @@ function createDefaultManifest(
 
 export default tool({
   description:
-    "Manage VibeSci research sessions - create, read, update, delete session manifests. " +
+    "Manage Gyoshu research sessions - create, read, update, delete session manifests. " +
     "Sessions track notebook paths, execution history, environment metadata, and random seeds " +
     "for scientific reproducibility.",
   args: {

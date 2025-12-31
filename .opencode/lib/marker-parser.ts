@@ -1,5 +1,5 @@
 /**
- * Marker Parser for VibeSci structured output.
+ * Marker Parser for Gyoshu structured output.
  * 
  * Parses structured markers from agent output text to enable:
  * - Reproducibility tracking of research steps
@@ -69,7 +69,7 @@ export interface ParseResult {
 }
 
 /**
- * Complete marker taxonomy for VibeSci research workflows.
+ * Complete marker taxonomy for Gyoshu research workflows.
  * 
  * Categories:
  * - RESEARCH_PROCESS: Core scientific method steps

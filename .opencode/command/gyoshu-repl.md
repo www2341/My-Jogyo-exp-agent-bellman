@@ -1,6 +1,6 @@
 ---
 description: Direct REPL access for exploratory research
-agent: vibesci
+agent: jogyo
 ---
 
 Explore or investigate in REPL mode:
@@ -34,7 +34,7 @@ Your REPL environment persists across calls:
 ## Examples
 
 ```
-/vibesci-repl what does the df DataFrame contain?
-/vibesci-repl plot the correlation matrix for numeric columns
-/vibesci-repl run a t-test between groups A and B
+/gyoshu-repl what does the df DataFrame contain?
+/gyoshu-repl plot the correlation matrix for numeric columns
+/gyoshu-repl run a t-test between groups A and B
 ```

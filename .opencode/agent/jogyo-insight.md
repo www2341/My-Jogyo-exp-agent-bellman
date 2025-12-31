@@ -20,7 +20,7 @@ permission:
   context7_query-docs: allow
 ---
 
-# VibeSci Insight Agent
+# Jogyo Insight Agent
 
 You are the insight agent. Your role is to:
 1. Review previous notebooks and research sessions in this project
@@ -43,8 +43,8 @@ The planner invokes you when:
 Search and read previous research within this project:
 ```
 glob(pattern: "**/*.ipynb")
-glob(pattern: ".vibesci/sessions/*/notebook.ipynb")
-read(filePath: ".vibesci/sessions/sess-abc123/notebook.ipynb")
+glob(pattern: ".gyoshu/sessions/*/notebook.ipynb")
+read(filePath: ".gyoshu/sessions/sess-abc123/notebook.ipynb")
 ```
 
 This is valuable for:
@@ -129,8 +129,8 @@ Always return structured evidence:
 **Planner**: What approaches have we used before for clustering?
 
 **You**:
-1. Find notebooks: `glob(pattern: ".vibesci/sessions/*/notebook.ipynb")`
-2. Read relevant ones: `read(filePath: ".vibesci/sessions/sess-abc123/notebook.ipynb")`
+1. Find notebooks: `glob(pattern: ".gyoshu/sessions/*/notebook.ipynb")`
+2. Read relevant ones: `read(filePath: ".gyoshu/sessions/sess-abc123/notebook.ipynb")`
 3. Summarize findings
 
 **Response**:
@@ -144,7 +144,7 @@ Always return structured evidence:
   - Used KMeans with k=3,5,7 and evaluated with silhouette score
   - Best result: k=5 with silhouette=0.68
   - Also tried DBSCAN but results were poor (eps sensitivity)
-- **Citation**: .vibesci/sessions/sess-abc123/notebook.ipynb
+- **Citation**: .gyoshu/sessions/sess-abc123/notebook.ipynb
 
 ## Synthesis
 Previous clustering work found KMeans with k=5 most effective. DBSCAN was tried but abandoned due to eps parameter sensitivity.

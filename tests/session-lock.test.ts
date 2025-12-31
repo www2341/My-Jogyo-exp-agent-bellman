@@ -27,7 +27,7 @@ import {
 let testDir: string;
 
 beforeEach(async () => {
-  testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'vibesci-session-lock-test-'));
+  testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gyoshu-session-lock-test-'));
 });
 
 afterEach(async () => {

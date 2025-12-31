@@ -73,7 +73,7 @@ function checkCloudSyncPaths(sessionDir: string, warnings: FilesystemWarning[]):
 }
 
 function logWarnings(warnings: FilesystemWarning[]): void {
-  console.warn('[VibeSci] Filesystem Warnings:');
+  console.warn('[Gyoshu] Filesystem Warnings:');
   warnings.forEach(w => console.warn(`  - ${w.message}`));
   console.warn('  Consider using a local directory for reliable operation.');
 }

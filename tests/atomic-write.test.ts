@@ -20,7 +20,7 @@ let testDir: string;
 
 beforeEach(async () => {
   // Create a unique temp directory for each test
-  testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'vibesci-atomic-write-test-'));
+  testDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gyoshu-atomic-write-test-'));
 });
 
 afterEach(async () => {

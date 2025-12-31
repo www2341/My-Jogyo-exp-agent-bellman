@@ -1,7 +1,7 @@
 /**
  * Retrospective Store Tool - Manages feedback storage and retrieval for cross-session learning.
  * 
- * Storage: {project}/.vibesci/retrospectives/feedback.jsonl
+ * Storage: {project}/.gyoshu/retrospectives/feedback.jsonl
  * Actions: append, list, query, top, stats
  * 
  * @module retrospective-store
@@ -33,7 +33,7 @@ interface StoreIndex {
 }
 
 function getRetroDir(): string {
-  return path.join(process.cwd(), ".vibesci", "retrospectives");
+  return path.join(process.cwd(), ".gyoshu", "retrospectives");
 }
 
 function getFeedbackFile(): string {

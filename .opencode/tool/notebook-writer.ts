@@ -1,5 +1,5 @@
 /**
- * Notebook Writer Tool - Manages Jupyter notebooks for VibeSci research.
+ * Notebook Writer Tool - Manages Jupyter notebooks for Gyoshu research.
  * Features: nbformat 4.5 with cell IDs, atomic writes, metadata-based report cells.
  * @module notebook-writer
  */
@@ -38,13 +38,13 @@ interface ErrorOutput {
 
 type CellOutput = StreamOutput | ExecuteResultOutput | DisplayDataOutput | ErrorOutput;
 
-interface VibeSciCellMetadata {
+interface GyoshuCellMetadata {
   type?: "report" | "research" | "data";
   version?: number;
   lastUpdated?: string;
 }
 
-interface VibeSciNotebookMetadata {
+interface GyoshuNotebookMetadata {
   researchSessionID: string;
   finalized?: string;
   createdAt?: string;
@@ -65,10 +65,10 @@ function createEmptyNotebook(sessionId: string): Notebook {
         mimetype: "text/x-python",
         file_extension: ".py",
       },
-      vibesci: {
+      gyoshu: {
         researchSessionID: sessionId,
         createdAt: new Date().toISOString(),
-      } as VibeSciNotebookMetadata,
+      } as GyoshuNotebookMetadata,
     },
     nbformat: 4,
     nbformat_minor: 5,
@@ -80,11 +80,11 @@ function createReportCell(): NotebookCell {
     cell_type: "markdown",
     id: `report-${crypto.randomUUID().slice(0, 8)}`,
     metadata: {
-      vibesci: {
+      gyoshu: {
         type: "report",
         version: 1,
         lastUpdated: new Date().toISOString(),
-      } as VibeSciCellMetadata,
+      } as GyoshuCellMetadata,
     },
     source: [
       "# Research Report\n",
@@ -94,16 +94,16 @@ function createReportCell(): NotebookCell {
   };
 }
 
-// IMPORTANT: Uses metadata.vibesci.type === "report", NOT position-based detection
+// IMPORTANT: Uses metadata.gyoshu.type === "report", NOT position-based detection
 function findReportCellByMetadata(notebook: Notebook): number {
   return notebook.cells.findIndex((cell) => {
-    const vibesci = cell.metadata?.vibesci as VibeSciCellMetadata | undefined;
-    return vibesci?.type === "report";
+    const gyoshu = cell.metadata?.gyoshu as GyoshuCellMetadata | undefined;
+    return gyoshu?.type === "report";
   });
 }
 
 function generateCellId(): string {
-  return `vibesci-${crypto.randomUUID().slice(0, 8)}`;
+  return `gyoshu-${crypto.randomUUID().slice(0, 8)}`;
 }
 
 async function readNotebook(notebookPath: string): Promise<Notebook | null> {
@@ -133,7 +133,7 @@ async function saveNotebookWithCellIds(
 export default tool({
   name: "notebook-writer",
   description:
-    "Write and manage Jupyter notebooks for VibeSci research. " +
+    "Write and manage Jupyter notebooks for Gyoshu research. " +
     "Actions: ensure_notebook, append_cell, upsert_report_cell, finalize. " +
     "Uses atomic writes and nbformat 4.5 with cell IDs.",
 
@@ -233,10 +233,10 @@ export default tool({
           id: cellId,
           source: args.source || [],
           metadata: {
-            vibesci: {
+            gyoshu: {
               type: "research",
               lastUpdated: new Date().toISOString(),
-            } as VibeSciCellMetadata,
+            } as GyoshuCellMetadata,
           },
         };
 
@@ -270,18 +270,18 @@ export default tool({
           const existingCell = nb.cells[reportIdx];
           existingCell.source = reportSource;
 
-          const metadata = existingCell.metadata?.vibesci as VibeSciCellMetadata;
+          const metadata = existingCell.metadata?.gyoshu as GyoshuCellMetadata;
           if (metadata) {
             metadata.version = (metadata.version || 0) + 1;
             metadata.lastUpdated = new Date().toISOString();
           } else {
             existingCell.metadata = {
               ...existingCell.metadata,
-              vibesci: {
+              gyoshu: {
                 type: "report",
                 version: 1,
                 lastUpdated: new Date().toISOString(),
-              } as VibeSciCellMetadata,
+              } as GyoshuCellMetadata,
             };
           }
 
@@ -291,7 +291,7 @@ export default tool({
             success: true,
             action: "updated",
             cellId: existingCell.id,
-            version: (existingCell.metadata?.vibesci as VibeSciCellMetadata)?.version,
+            version: (existingCell.metadata?.gyoshu as GyoshuCellMetadata)?.version,
             message: "Updated existing report cell",
           });
         } else {
@@ -312,17 +312,17 @@ export default tool({
       }
 
       case "finalize": {
-        const vibesci = nb.metadata.vibesci as VibeSciNotebookMetadata;
-        vibesci.finalized = new Date().toISOString();
+        const gyoshu = nb.metadata.gyoshu as GyoshuNotebookMetadata;
+        gyoshu.finalized = new Date().toISOString();
 
         await saveNotebookWithCellIds(notebookPath, nb);
 
         return JSON.stringify({
           success: true,
           finalized: true,
-          finalizedAt: vibesci.finalized,
+          finalizedAt: gyoshu.finalized,
           cellCount: nb.cells.length,
-          message: `Notebook finalized at ${vibesci.finalized}`,
+          message: `Notebook finalized at ${gyoshu.finalized}`,
         });
       }
 

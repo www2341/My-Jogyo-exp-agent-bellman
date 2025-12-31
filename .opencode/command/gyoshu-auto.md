@@ -1,6 +1,6 @@
 ---
 description: Start goal-based autonomous research with bounded execution
-agent: vibesci-planner
+agent: gyoshu
 ---
 
 Start an AUTONOMOUS research session for the following goal:
@@ -11,14 +11,14 @@ $ARGUMENTS
 
 This command runs in **AUTO mode** - bounded autonomous execution that:
 1. Creates or continues a session targeting the specified goal
-2. Runs a bounded loop: delegate to @vibesci → verify progress → check completion
+2. Runs a bounded loop: delegate to @jogyo → verify progress → check completion
 3. Continues until goal is COMPLETED, BLOCKED (needs user input), or budget exhausted
 
 ## Default Budgets
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| maxCycles | 10 | Maximum delegation cycles to @vibesci |
+| maxCycles | 10 | Maximum delegation cycles to @jogyo |
 | maxToolCalls | 100 | Maximum tool invocations across all cycles |
 | maxTimeMinutes | 60 | Maximum wall-clock time for the session |
 
@@ -32,9 +32,9 @@ The autonomous loop stops when any of these occur:
 ## Example Usage
 
 ```
-/vibesci-auto analyze the iris dataset and identify clustering patterns
-/vibesci-auto investigate correlation between features X and Y in sales data
-/vibesci-auto reproduce the analysis from paper.pdf and validate findings
+/gyoshu-auto analyze the iris dataset and identify clustering patterns
+/gyoshu-auto investigate correlation between features X and Y in sales data
+/gyoshu-auto reproduce the analysis from paper.pdf and validate findings
 ```
 
 The planner will autonomously coordinate research execution, handle errors, and produce a final report.

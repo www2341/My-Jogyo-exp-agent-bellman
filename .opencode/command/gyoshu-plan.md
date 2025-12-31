@@ -1,6 +1,6 @@
 ---
-description: Create a VibeSci research plan
-agent: vibesci-planner
+description: Create a Gyoshu research plan
+agent: gyoshu
 ---
 
 Create a detailed research plan for the following goal:

@@ -1,6 +1,6 @@
 ---
 description: Generate comprehensive research report
-agent: vibesci-planner
+agent: gyoshu
 ---
 
 Generate a comprehensive research report for the current session.
@@ -16,4 +16,4 @@ The report should include:
 6. Limitations
 7. Recommended next steps
 
-> **Note:** If the session was signaled complete (`vibesci_completion`), the report will highlight key results (`keyResults`) and reference generated artifacts (`artifactPaths`).
+> **Note:** If the session was signaled complete (`gyoshu_completion`), the report will highlight key results (`keyResults`) and reference generated artifacts (`artifactPaths`).

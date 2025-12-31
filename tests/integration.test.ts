@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as readline from 'readline';
 import * as fs from 'fs/promises';
 
-const BRIDGE_PATH = path.join(__dirname, '..', '.opencode', 'bridge', 'vibesci_bridge.py');
+const BRIDGE_PATH = path.join(__dirname, '..', '.opencode', 'bridge', 'gyoshu_bridge.py');
 const REQUEST_TIMEOUT_MS = 5000;
 
 interface JsonRpcRequest {
@@ -626,7 +626,7 @@ describe('Bridge Spawn Edge Cases', () => {
     await new Promise(resolve => setTimeout(resolve, 50));
 
     const stderr = bridge.getStderr();
-    expect(stderr).toContain('vibesci_bridge');
+    expect(stderr).toContain('gyoshu_bridge');
     expect(stderr).toContain('Started');
 
     await bridge.stop();

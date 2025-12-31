@@ -93,11 +93,11 @@ const locks = new Map<string, SessionLock>();
 let requestIdCounter = 0;
 
 function getBridgePath(): string {
-  return path.join(__dirname, "..", "bridge", "vibesci_bridge.py");
+  return path.join(__dirname, "..", "bridge", "gyoshu_bridge.py");
 }
 
 function getSessionDir(sessionId: string): string {
-  return path.join(os.homedir(), ".vibesci", "sessions", sessionId);
+  return path.join(os.homedir(), ".gyoshu", "sessions", sessionId);
 }
 
 function getLockPath(sessionId: string): string {
@@ -114,7 +114,7 @@ function getBridgeMetaPath(sessionId: string): string {
 
 /**
  * Detect the Python environment for a project directory.
- * Priority: VIBESCI_PYTHON_PATH > .venv/venv > uv > poetry > conda > system
+ * Priority: GYOSHU_PYTHON_PATH > .venv/venv > uv > poetry > conda > system
  */
 function detectPythonEnvironment(projectDir: string): PythonEnvironment {
   const fallback: PythonEnvironment = {
@@ -125,8 +125,8 @@ function detectPythonEnvironment(projectDir: string): PythonEnvironment {
     detected: false,
   };
 
-  // 1. Check VIBESCI_PYTHON_PATH env var (user override)
-  const customPath = process.env.VIBESCI_PYTHON_PATH;
+  // 1. Check GYOSHU_PYTHON_PATH env var (user override)
+  const customPath = process.env.GYOSHU_PYTHON_PATH;
   if (customPath && fs.existsSync(customPath)) {
     console.log(`[python-repl] Using custom Python: ${customPath}`);
     return {
@@ -775,11 +775,11 @@ export default tool({
 });
 
 /**
- * Cleanup function exported for use by vibesci-hooks.ts
+ * Cleanup function exported for use by gyoshu-hooks.ts
  * Kills all known bridge servers
  */
 export async function cleanupAllBridges(): Promise<void> {
-  const sessionsDir = path.join(os.homedir(), ".vibesci", "sessions");
+  const sessionsDir = path.join(os.homedir(), ".gyoshu", "sessions");
   
   if (!fs.existsSync(sessionsDir)) {
     return;

@@ -1,6 +1,6 @@
 ---
-description: Manually unlock a stuck VibeSci session
-agent: vibesci-planner
+description: Manually unlock a stuck Gyoshu session
+agent: gyoshu
 ---
 
 Unlock session: $ARGUMENTS

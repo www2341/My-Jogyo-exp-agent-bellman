@@ -1,4 +1,4 @@
-# VibeSci
+# Gyoshu
 
 Scientific research agent extension for OpenCode. Enables hypothesis-driven research with Python REPL, structured output markers, and Jupyter notebook integration.
 
@@ -12,7 +12,9 @@ Scientific research agent extension for OpenCode. Enables hypothesis-driven rese
 
 ## Installation
 
-VibeSci is an OpenCode extension. To install:
+Gyoshu is an OpenCode extension. To install:
+
+> **Note**: The GitHub repository is currently named `VibeSci`. The URLs below will be updated after the repository rename to `Gyoshu`.
 
 ### One-click global installation
 
@@ -27,7 +29,7 @@ cd VibeSci && ./install.sh
 
 ### Manual Installation
 
-To install VibeSci manually:
+To install Gyoshu manually:
 
 1. Copy the `.opencode/` directory to your project root
 2. Or copy to `~/.config/opencode/` for global availability
@@ -48,42 +50,42 @@ cp -r .opencode/* ~/.config/opencode/
 opencode
 
 # Create a research plan
-/vibesci-plan analyze the iris dataset to identify species clusters
+/gyoshu-plan analyze the iris dataset to identify species clusters
 
 # Start research (new session)
-/vibesci-run
+/gyoshu-run
 
 # Continue research (preserves REPL state)
-/vibesci-continue now cluster the data using k-means
+/gyoshu-continue now cluster the data using k-means
 
 # Generate report
-/vibesci-report
+/gyoshu-report
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/vibesci-plan <goal>` | Create a detailed research plan |
-| `/vibesci-auto <goal>` | **NEW** Autonomous research with bounded cycles |
-| `/vibesci-interactive <goal>` | **NEW** Single-cycle interactive mode |
-| `/vibesci-run` | Start a new research session (PLANNER mode) |
-| `/vibesci-continue` | Continue research with preserved REPL state |
-| `/vibesci-repl <query>` | **NEW** Direct REPL exploration |
-| `/vibesci-abort` | **NEW** Graceful abort with state preservation |
-| `/vibesci-report` | Generate comprehensive research report |
-| `/vibesci-replay <sessionId>` | Replay session for reproducibility |
-| `/vibesci-unlock <sessionId>` | Manually unlock a stuck session |
+| `/gyoshu-plan <goal>` | Create a detailed research plan |
+| `/gyoshu-auto <goal>` | **NEW** Autonomous research with bounded cycles |
+| `/gyoshu-interactive <goal>` | **NEW** Single-cycle interactive mode |
+| `/gyoshu-run` | Start a new research session (PLANNER mode) |
+| `/gyoshu-continue` | Continue research with preserved REPL state |
+| `/gyoshu-repl <query>` | **NEW** Direct REPL exploration |
+| `/gyoshu-abort` | **NEW** Graceful abort with state preservation |
+| `/gyoshu-report` | Generate comprehensive research report |
+| `/gyoshu-replay <sessionId>` | Replay session for reproducibility |
+| `/gyoshu-unlock <sessionId>` | Manually unlock a stuck session |
 
 ## Research Modes
 
-VibeSci supports three orchestration modes:
+Gyoshu supports three orchestration modes:
 
 | Mode | Command | Description |
 |------|---------|-------------|
-| **AUTO** | `/vibesci-auto` | Autonomous execution with bounded cycles (max 10). Runs until completion, blocked, or budget exhausted. |
-| **PLANNER** | `/vibesci-interactive` | Single-cycle interactive mode. Executes one step, returns control to user with options. |
-| **REPL** | `/vibesci-repl` | Direct REPL access for exploration. More autonomy, can explore tangentially. |
+| **AUTO** | `/gyoshu-auto` | Autonomous execution with bounded cycles (max 10). Runs until completion, blocked, or budget exhausted. |
+| **PLANNER** | `/gyoshu-interactive` | Single-cycle interactive mode. Executes one step, returns control to user with options. |
+| **REPL** | `/gyoshu-repl` | Direct REPL access for exploration. More autonomy, can explore tangentially. |
 
 ### Mode Selection Guide
 
@@ -93,21 +95,21 @@ VibeSci supports three orchestration modes:
 
 ## Agents
 
-### vibesci-planner (Primary)
+### gyoshu (Primary)
 The main orchestrator. Switch to it with Tab. Controls:
 - Research workflow
 - REPL lifecycle (new vs continue)
 - Session management
 
-### vibesci (Subagent)
-The research executor. Invoked by planner via @vibesci. Handles:
+### jogyo (Subagent)
+The research executor. Invoked by planner via @jogyo. Handles:
 - Python code execution
 - Structured output with markers
 - Data analysis and visualization
 
 ## Output Markers
 
-VibeSci uses structured markers for organized output:
+Gyoshu uses structured markers for organized output:
 
 ### Research Process
 - `[OBJECTIVE]` - Research goal
@@ -147,38 +149,38 @@ Load skills for specialized guidance:
 ```
 .opencode/
 ├── agent/
-│   ├── vibesci.md              # Research agent with completion signaling
-│   └── vibesci-planner.md      # Planner with multi-mode orchestration
+│   ├── jogyo.md                # Research agent with completion signaling
+│   └── gyoshu.md               # Planner with multi-mode orchestration
 ├── command/
-│   ├── vibesci-plan.md
-│   ├── vibesci-auto.md         # NEW: Autonomous mode
-│   ├── vibesci-interactive.md  # NEW: Interactive mode
-│   ├── vibesci-run.md
-│   ├── vibesci-continue.md
-│   ├── vibesci-repl.md         # NEW: Direct REPL
-│   ├── vibesci-abort.md        # NEW: Graceful abort
-│   ├── vibesci-report.md
-│   ├── vibesci-replay.md
-│   └── vibesci-unlock.md
+│   ├── gyoshu-plan.md
+│   ├── gyoshu-auto.md          # NEW: Autonomous mode
+│   ├── gyoshu-interactive.md   # NEW: Interactive mode
+│   ├── gyoshu-run.md
+│   ├── gyoshu-continue.md
+│   ├── gyoshu-repl.md          # NEW: Direct REPL
+│   ├── gyoshu-abort.md         # NEW: Graceful abort
+│   ├── gyoshu-report.md
+│   ├── gyoshu-replay.md
+│   └── gyoshu-unlock.md
 ├── tool/
 │   ├── python-repl.ts
 │   ├── notebook-writer.ts
 │   ├── session-manager.ts      # State machine (modes, goals, budgets)
-│   ├── vibesci-snapshot.ts     # NEW: Session state for planner
-│   └── vibesci-completion.ts   # NEW: Completion signaling
+│   ├── gyoshu-snapshot.ts      # NEW: Session state for planner
+│   └── gyoshu-completion.ts    # NEW: Completion signaling
 ├── lib/
 │   └── ...
 ├── bridge/
-│   └── vibesci_bridge.py
+│   └── gyoshu_bridge.py
 ├── skill/
 │   └── ...
 └── plugin/
-    └── vibesci-hooks.ts
+    └── gyoshu-hooks.ts
 ```
 
 ## Session Storage
 
-Sessions are stored at `~/.vibesci/sessions/{sessionId}/`:
+Sessions are stored at `~/.gyoshu/sessions/{sessionId}/`:
 - `manifest.json` - Session metadata and execution history
 - `notebook.ipynb` - Jupyter notebook with report and code cells
 - `artifacts/` - Generated plots and files
@@ -186,7 +188,7 @@ Sessions are stored at `~/.vibesci/sessions/{sessionId}/`:
 ## Example Workflow
 
 ```python
-# In the REPL (executed by @vibesci)
+# In the REPL (executed by @jogyo)
 
 print("[OBJECTIVE] Identify factors affecting iris species classification")
 

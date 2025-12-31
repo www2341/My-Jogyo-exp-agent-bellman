@@ -1,7 +1,7 @@
 /**
- * VibeSci Completion Tool - Structured completion signaling with evidence.
+ * Gyoshu Completion Tool - Structured completion signaling with evidence.
  * Part of two-layer completion: worker proposes via this tool, planner verifies via snapshot.
- * @module vibesci-completion
+ * @module gyoshu-completion
  */
 
 import { tool } from "@opencode-ai/plugin";
@@ -10,7 +10,7 @@ import * as path from "path";
 import * as os from "os";
 import { durableAtomicWrite, fileExists, readFile } from "../lib/atomic-write";
 
-const SESSIONS_DIR = path.join(os.homedir(), ".vibesci", "sessions");
+const SESSIONS_DIR = path.join(os.homedir(), ".gyoshu", "sessions");
 
 interface KeyResult {
   name: string;
@@ -159,7 +159,7 @@ function mapToGoalStatus(status: CompletionStatus): string {
 }
 
 export default tool({
-  name: "vibesci_completion",
+  name: "gyoshu_completion",
   description:
     "Signal research session completion with structured evidence. " +
     "Validates evidence is present for SUCCESS/PARTIAL status, " +

@@ -1,6 +1,6 @@
 ---
-description: Continue existing VibeSci research (preserves REPL state)
-agent: vibesci-planner
+description: Continue existing Gyoshu research (preserves REPL state)
+agent: gyoshu
 ---
 
 Continue the current research session with:

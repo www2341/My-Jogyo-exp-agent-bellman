@@ -10,7 +10,7 @@ permission:
   retrospective-store: allow
 ---
 
-# VibeSci Feedback Explorer Agent
+# Jogyo Feedback Explorer Agent
 
 You are the feedback explorer agent. Your role is to:
 1. Query past feedback to find relevant lessons for THIS PROJECT
@@ -18,7 +18,7 @@ You are the feedback explorer agent. Your role is to:
 3. Synthesize actionable recommendations
 4. Return concise, applicable insights
 
-**Storage**: Project-local at `.vibesci/retrospectives/feedback.jsonl`
+**Storage**: Project-local at `.gyoshu/retrospectives/feedback.jsonl`
 
 ## When Called
 

@@ -1,5 +1,5 @@
 /**
- * VibeSci Snapshot Tool - Provides a compact summary of session state for the planner.
+ * Gyoshu Snapshot Tool - Provides a compact summary of session state for the planner.
  *
  * Returns structured data about:
  * - Session status and goal
@@ -9,7 +9,7 @@
  * - Notebook outline
  * - Timing information
  *
- * @module vibesci-snapshot
+ * @module gyoshu-snapshot
  */
 
 import { tool } from "@opencode-ai/plugin";
@@ -19,9 +19,9 @@ import * as os from "os";
 import { fileExists, readFile } from "../lib/atomic-write";
 
 /**
- * Root directory for all VibeSci session data.
+ * Root directory for all Gyoshu session data.
  */
-const SESSIONS_DIR = path.join(os.homedir(), ".vibesci", "sessions");
+const SESSIONS_DIR = path.join(os.homedir(), ".gyoshu", "sessions");
 
 /**
  * Session manifest structure (matches session-manager.ts)
@@ -64,7 +64,7 @@ interface NotebookCell {
   id?: string;
   source: string[];
   metadata?: {
-    vibesci?: {
+    gyoshu?: {
       type?: "report" | "research" | "data";
       version?: number;
       lastUpdated?: string;
@@ -80,7 +80,7 @@ interface NotebookCell {
 interface Notebook {
   cells: NotebookCell[];
   metadata: {
-    vibesci?: {
+    gyoshu?: {
       researchSessionID: string;
       finalized?: string;
       createdAt?: string;
@@ -312,11 +312,11 @@ function buildNotebookOutline(
   for (let i = 0; i < Math.min(notebook.cells.length, maxCells); i++) {
     const cell = notebook.cells[i];
     const cellId = cell.id || `cell-${i}`;
-    const vibesciMeta = cell.metadata?.vibesci;
+    const gyoshuMeta = cell.metadata?.gyoshu;
 
     let type: string = cell.cell_type;
-    if (vibesciMeta?.type) {
-      type = `${cell.cell_type}:${vibesciMeta.type}`;
+    if (gyoshuMeta?.type) {
+      type = `${cell.cell_type}:${gyoshuMeta.type}`;
     }
 
     outline.push({
@@ -344,9 +344,9 @@ function calculateElapsedMinutes(createdAt: string): number {
 }
 
 export default tool({
-  name: "vibesci_snapshot",
+  name: "gyoshu_snapshot",
   description:
-    "Get a compact snapshot of VibeSci session state for the planner. " +
+    "Get a compact snapshot of Gyoshu session state for the planner. " +
     "Returns session status, recent cells, artifacts, REPL variables, " +
     "notebook outline, and timing information.",
 

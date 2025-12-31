@@ -15,15 +15,19 @@
 
 ## Pre-Flight Checklist
 
-- [ ] 1. Verify clean git state and create safety branch
+- [x] 1. Verify clean git state and create safety branch
   - **Command**: `git status && git checkout -b rebrand/vibesci-to-gyoshu`
   - **Parallelizable**: NO (must be first)
   - **Acceptance**: Branch created, working tree clean
 
-- [ ] 2. Run existing tests to establish baseline
+- [x] 2. Run existing tests to establish baseline
   - **Command**: `pytest -v && bun test`
   - **Parallelizable**: NO (depends on Task 1)
   - **Acceptance**: All tests pass before changes
+  - **Result**: ✅ BASELINE ESTABLISHED (2024-12-31)
+    - Python: 50 tests passed (0.08s)
+    - TypeScript: 122 tests passed (4.83s)
+    - Total: 172 tests, 0 failures
 
 ---
 
@@ -31,29 +35,29 @@
 
 ### 1.1 Agent Files
 
-- [ ] 3. Rename vibesci-planner.md → gyoshu.md (primary agent)
+- [x] 3. Rename vibesci-planner.md → gyoshu.md (primary agent)
   - **Command**: `git mv .opencode/agent/vibesci-planner.md .opencode/agent/gyoshu.md`
   - **Parallelizable**: YES (with Tasks 4-6)
   - **Acceptance**: File exists at new path
 
-- [ ] 4. Rename vibesci.md → jogyo.md (subagent)
+- [x] 4. Rename vibesci.md → jogyo.md (subagent)
   - **Command**: `git mv .opencode/agent/vibesci.md .opencode/agent/jogyo.md`
   - **Parallelizable**: YES (with Tasks 3, 5-6)
   - **Acceptance**: File exists at new path
 
-- [ ] 5. Rename vibesci-feedback.md → jogyo-feedback.md
+- [x] 5. Rename vibesci-feedback.md → jogyo-feedback.md
   - **Command**: `git mv .opencode/agent/vibesci-feedback.md .opencode/agent/jogyo-feedback.md`
   - **Parallelizable**: YES (with Tasks 3-4, 6)
   - **Acceptance**: File exists at new path
 
-- [ ] 6. Rename vibesci-insight.md → jogyo-insight.md
+- [x] 6. Rename vibesci-insight.md → jogyo-insight.md
   - **Command**: `git mv .opencode/agent/vibesci-insight.md .opencode/agent/jogyo-insight.md`
   - **Parallelizable**: YES (with Tasks 3-5)
   - **Acceptance**: File exists at new path
 
 ### 1.2 Command Files
 
-- [ ] 7. Rename all vibesci-*.md command files to gyoshu-*.md
+- [x] 7. Rename all vibesci-*.md command files to gyoshu-*.md
   - **Commands**:
     ```bash
     git mv .opencode/command/vibesci-plan.md .opencode/command/gyoshu-plan.md
@@ -72,26 +76,26 @@
 
 ### 1.3 Tool Files
 
-- [ ] 8. Rename vibesci-completion.ts → gyoshu-completion.ts
+- [x] 8. Rename vibesci-completion.ts → gyoshu-completion.ts
   - **Command**: `git mv .opencode/tool/vibesci-completion.ts .opencode/tool/gyoshu-completion.ts`
   - **Parallelizable**: YES (with Tasks 3-7, 9-10)
   - **Acceptance**: File exists at new path
 
-- [ ] 9. Rename vibesci-snapshot.ts → gyoshu-snapshot.ts
+- [x] 9. Rename vibesci-snapshot.ts → gyoshu-snapshot.ts
   - **Command**: `git mv .opencode/tool/vibesci-snapshot.ts .opencode/tool/gyoshu-snapshot.ts`
   - **Parallelizable**: YES (with Tasks 3-8, 10)
   - **Acceptance**: File exists at new path
 
 ### 1.4 Bridge File
 
-- [ ] 10. Rename vibesci_bridge.py → gyoshu_bridge.py
+- [x] 10. Rename vibesci_bridge.py → gyoshu_bridge.py
   - **Command**: `git mv .opencode/bridge/vibesci_bridge.py .opencode/bridge/gyoshu_bridge.py`
   - **Parallelizable**: YES (with Tasks 3-9)
   - **Acceptance**: File exists at new path
 
 ### 1.5 Directory Rename
 
-- [ ] 11. Rename plans/vibesci/ → plans/gyoshu/
+- [x] 11. Rename plans/vibesci/ → plans/gyoshu/
   - **Command**: `git mv plans/vibesci plans/gyoshu`
   - **Parallelizable**: YES (with Tasks 3-10)
   - **Acceptance**: Directory exists at new path with contents
@@ -102,7 +106,7 @@
 
 ### 2.1 Agent Definition Updates
 
-- [ ] 12. Update gyoshu.md (formerly vibesci-planner.md) content
+- [x] 12. Update gyoshu.md (formerly vibesci-planner.md) content
   - **Changes**:
     - Title: "VibeSci Planner Agent" → "Gyoshu Research Planner"
     - Tool references: `vibesci-completion` → `gyoshu-completion`, `vibesci-snapshot` → `gyoshu-snapshot`
@@ -112,7 +116,7 @@
   - **Parallelizable**: YES (with Tasks 13-15)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 13. Update jogyo.md (formerly vibesci.md) content
+- [x] 13. Update jogyo.md (formerly vibesci.md) content
   - **Changes**:
     - Title: "VibeSci Research Agent" → "Jogyo Research Agent"
     - Tool references: `vibesci-completion` → `gyoshu-completion`, `vibesci_completion` → `gyoshu_completion`
@@ -121,21 +125,21 @@
   - **Parallelizable**: YES (with Tasks 12, 14-15)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 14. Update jogyo-feedback.md content
+- [x] 14. Update jogyo-feedback.md content
   - **Changes**:
     - All `vibesci` → `jogyo` or `gyoshu` as appropriate
     - Path references: `.vibesci/retrospectives/` → `.gyoshu/retrospectives/`
   - **Parallelizable**: YES (with Tasks 12-13, 15)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 15. Update jogyo-insight.md content
+- [x] 15. Update jogyo-insight.md content
   - **Changes**: Similar to Task 14
   - **Parallelizable**: YES (with Tasks 12-14)
   - **Acceptance**: No "vibesci" references remain in file
 
 ### 2.2 Command File Updates
 
-- [ ] 16. Update all 10 gyoshu-*.md command files
+- [x] 16. Update all 10 gyoshu-*.md command files
   - **Pattern replacements in each file**:
     - `/vibesci-*` → `/gyoshu-*` (command names)
     - `vibesci-planner` → `gyoshu` (agent references)
@@ -146,7 +150,7 @@
 
 ### 2.3 Tool File Updates
 
-- [ ] 17. Update gyoshu-completion.ts content
+- [x] 17. Update gyoshu-completion.ts content
   - **Changes**:
     - JSDoc: "VibeSci" → "Gyoshu"
     - Tool name registration (if any)
@@ -155,12 +159,12 @@
   - **Parallelizable**: YES (with Tasks 12-16, 18-20)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 18. Update gyoshu-snapshot.ts content
+- [x] 18. Update gyoshu-snapshot.ts content
   - **Changes**: Similar to Task 17
   - **Parallelizable**: YES (with Tasks 12-17, 19-20)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 19. Update session-manager.ts
+- [x] 19. Update session-manager.ts
   - **Changes**:
     - JSDoc: "VibeSci" → "Gyoshu"
     - `SESSIONS_DIR` constant: `.vibesci` → `.gyoshu`
@@ -168,7 +172,7 @@
   - **Parallelizable**: YES (with Tasks 12-18, 20)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 20. Update other tool files (notebook-writer.ts, python-repl.ts, retrospective-store.ts)
+- [x] 20. Update other tool files (notebook-writer.ts, python-repl.ts, retrospective-store.ts)
   - **Changes**:
     - Cell ID prefix: `vibesci-` → `gyoshu-` (in cell-identity.ts or notebook-writer.ts)
     - JSDoc comments
@@ -178,7 +182,7 @@
 
 ### 2.4 Library File Updates
 
-- [ ] 21. Update .opencode/lib/*.ts files
+- [x] 21. Update .opencode/lib/*.ts files
   - **Files**: cell-identity.ts, session-lock.ts, others
   - **Changes**:
     - Cell ID prefix: `vibesci-` → `gyoshu-`
@@ -188,7 +192,7 @@
 
 ### 2.5 Bridge File Update
 
-- [ ] 22. Update gyoshu_bridge.py content
+- [x] 22. Update gyoshu_bridge.py content
   - **Changes**:
     - Module docstring: "VibeSci" → "Gyoshu"
     - `__name__` default: `__vibesci__` → `__gyoshu__`
@@ -200,7 +204,7 @@
 
 ## Phase 3: Configuration File Updates
 
-- [ ] 23. Update package.json
+- [x] 23. Update package.json
   - **Changes**:
     ```json
     "name": "vibesci" → "name": "gyoshu"
@@ -209,7 +213,7 @@
   - **Parallelizable**: YES (with Tasks 24-25)
   - **Acceptance**: `jq .name package.json` returns "gyoshu"
 
-- [ ] 24. Update pyproject.toml
+- [x] 24. Update pyproject.toml
   - **Changes**:
     ```toml
     name = "vibesci" → name = "gyoshu"
@@ -217,7 +221,7 @@
   - **Parallelizable**: YES (with Tasks 23, 25)
   - **Acceptance**: `grep "^name" pyproject.toml` shows "gyoshu"
 
-- [ ] 25. Update install.sh
+- [x] 25. Update install.sh
   - **Changes**:
     - Echo messages: "VibeSci" → "Gyoshu"
     - Paths: `~/.vibesci/` → `~/.gyoshu/`
@@ -230,7 +234,7 @@
 
 ## Phase 4: Test File Updates
 
-- [ ] 26. Update tests/test_bridge.py
+- [x] 26. Update tests/test_bridge.py
   - **Changes**:
     - Import: `from vibesci_bridge import` → `from gyoshu_bridge import`
     - Module references: `vibesci_bridge` → `gyoshu_bridge`
@@ -239,21 +243,21 @@
   - **Parallelizable**: YES (with Tasks 27-29)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 27. Update tests/integration.test.ts
+- [x] 27. Update tests/integration.test.ts
   - **Changes**:
     - Bridge path: `vibesci_bridge.py` → `gyoshu_bridge.py`
     - Error message assertions containing "vibesci"
   - **Parallelizable**: YES (with Tasks 26, 28-29)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 28. Update tests/cell-identity.test.ts
+- [x] 28. Update tests/cell-identity.test.ts
   - **Changes**:
     - Regex patterns: `/^vibesci-[a-f0-9]{8}$/` → `/^gyoshu-[a-f0-9]{8}$/`
     - All 9 occurrences of the pattern
   - **Parallelizable**: YES (with Tasks 26-27, 29)
   - **Acceptance**: No "vibesci" references remain in file
 
-- [ ] 29. Update tests/atomic-write.test.ts and tests/session-lock.test.ts
+- [x] 29. Update tests/atomic-write.test.ts and tests/session-lock.test.ts
   - **Changes**:
     - Temp directory prefixes: `vibesci-atomic-write-test-` → `gyoshu-atomic-write-test-`
     - `vibesci-session-lock-test-` → `gyoshu-session-lock-test-`
@@ -264,7 +268,7 @@
 
 ## Phase 5: Documentation Updates
 
-- [ ] 30. Update README.md
+- [x] 30. Update README.md
   - **Changes**:
     - Title: `# VibeSci` → `# Gyoshu`
     - All command examples: `/vibesci-*` → `/gyoshu-*`
@@ -276,7 +280,7 @@
   - **Parallelizable**: YES (with Task 31)
   - **Acceptance**: No "vibesci" or "VibeSci" references remain
 
-- [ ] 31. Update AGENTS.md
+- [x] 31. Update AGENTS.md
   - **Changes**:
     - Title: "VibeSci Repository Guide" → "Gyoshu Repository Guide"
     - All import examples: `from vibesci_bridge import` → `from gyoshu_bridge import`
@@ -290,22 +294,26 @@
 
 ## Phase 6: Verification & Cleanup
 
-- [ ] 32. Run comprehensive grep to find any remaining references
+- [x] 32. Run comprehensive grep to find any remaining references
   - **Command**: `grep -ri "vibesci" --include="*.ts" --include="*.py" --include="*.md" --include="*.json" --include="*.toml" --include="*.sh" . | grep -v node_modules | grep -v .venv | grep -v plans/gyoshu/ai-todolist`
   - **Parallelizable**: NO (depends on all previous tasks)
   - **Acceptance**: No matches found (except this plan file and historical plans)
 
-- [ ] 33. Regenerate bun.lock
+- [x] 33. Regenerate bun.lock
   - **Command**: `rm bun.lock && bun install`
   - **Parallelizable**: NO (depends on Task 23)
   - **Acceptance**: New bun.lock generated with "gyoshu" name
 
-- [ ] 34. Run full test suite
+- [x] 34. Run full test suite
   - **Command**: `pytest -v && bun test`
   - **Parallelizable**: NO (depends on all file changes)
   - **Acceptance**: All tests pass
+  - **Result**: ✅ VERIFIED (2024-12-31)
+    - Python: 50 tests passed (0.07s)
+    - TypeScript: 122 tests passed (4.85s)
+    - Total: 172 tests, 0 failures - matches baseline exactly
 
-- [ ] 35. Create summary commit
+- [x] 35. Create summary commit
   - **Command**: `git add -A && git commit -m "refactor: rebrand VibeSci to Gyoshu (교수/Professor)"`
   - **Parallelizable**: NO (must be last)
   - **Acceptance**: Clean commit with all changes
