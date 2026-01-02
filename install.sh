@@ -41,7 +41,15 @@ CONFIG_DIR="$HOME/.config/opencode"
 echo -e "📁 Creating config directory: ${YELLOW}$CONFIG_DIR${NC}"
 mkdir -p "$CONFIG_DIR"
 
-# 2. Copy extension files
+# 2. Clean up deprecated commands from previous installs
+DEPRECATED_COMMANDS="gyoshu-abort gyoshu-continue gyoshu-interactive gyoshu-list gyoshu-migrate gyoshu-plan gyoshu-replay gyoshu-repl gyoshu-report gyoshu-run gyoshu-search gyoshu-unlock"
+for cmd in $DEPRECATED_COMMANDS; do
+    if [ -f "$CONFIG_DIR/command/${cmd}.md" ]; then
+        rm -f "$CONFIG_DIR/command/${cmd}.md"
+    fi
+done
+
+# 3. Copy extension files
 echo -e "📋 Copying extension files..."
 if command -v rsync &> /dev/null; then
     rsync -a \
@@ -57,12 +65,12 @@ else
     find "$CONFIG_DIR" -name "*.test.js" -delete 2>/dev/null || true
 fi
 
-# 3. Clean up temp directory if used
+# 4. Clean up temp directory if used
 if [ -n "$TEMP_DIR" ]; then
     rm -rf "$TEMP_DIR"
 fi
 
-# 4. Check Python
+# 5. Check Python
 echo -e "🐍 Checking Python installation..."
 if command -v python3 &> /dev/null; then
     PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
@@ -72,7 +80,7 @@ else
     exit 1
 fi
 
-# 5. Check OpenCode
+# 6. Check OpenCode
 echo -e "🔍 Checking OpenCode installation..."
 if command -v opencode &> /dev/null; then
     echo -e "   ${GREEN}✓${NC} OpenCode found"
@@ -81,7 +89,7 @@ else
     echo -e "   Install it from: ${BLUE}https://github.com/opencode-ai/opencode${NC}"
 fi
 
-# 6. Success!
+# 7. Success!
 echo ""
 echo -e "${GREEN}┌─────────────────────────────────────────────────────┐${NC}"
 echo -e "${GREEN}│${NC}  ✅ ${GREEN}Installation Complete!${NC}                          ${GREEN}│${NC}"
