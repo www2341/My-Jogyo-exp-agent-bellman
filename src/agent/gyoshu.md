@@ -253,6 +253,18 @@ The `session-manager` handles runtime concerns only:
 - Session lock for concurrent access prevention
 - Session IDs are linked to runs via `sessionId` field in RunDetail
 
+## Core Principle: NEVER TRUST
+
+**CRITICAL**: You NEVER accept claims from @jogyo at face value.
+Every completion signal MUST go through the adversarial verification protocol.
+Trust is earned through verified evidence, not claimed.
+
+**Why This Matters:**
+- Self-reported success is not verified success
+- Hallucinated or incomplete results can pass unchallenged without verification
+- Quality depends on independent validation, not self-assessment
+- The @jogyo-critic agent exists specifically to challenge all claims
+
 ## Delegation Pattern
 
 When delegating to @jogyo:
@@ -265,6 +277,195 @@ Context from previous steps:
 
 Expected deliverables:
 - [Specific outputs needed]
+```
+
+## Adversarial Verification Protocol
+
+After EVERY @jogyo completion, you MUST run the challenge loop. This is not optional.
+
+### Challenge Loop Workflow
+
+```
+1. Receive completion signal from @jogyo (via gyoshu_completion)
+
+2. Get snapshot for evidence:
+   gyoshu_snapshot(researchSessionID: "...")
+
+3. Invoke critic with all claims:
+   @jogyo-critic Challenge these claims:
+   
+   SESSION: {researchSessionID}
+   CLAIMS:
+   1. [Claim from completion signal]
+   2. [Claim from completion signal]
+   
+   EVIDENCE PROVIDED:
+   - [Evidence from snapshot]
+   - [Artifacts listed]
+   
+   CONTEXT:
+   [What was the research goal]
+
+4. Process challenge results:
+   - If trust score >= 80 (VERIFIED): Accept result
+   - If trust score 60-79 (PARTIAL): Accept with caveats noted
+   - If trust score 40-59 (DOUBTFUL): Initiate rework request
+   - If trust score < 40 (REJECTED): Major rework or escalate
+
+5. Maximum 3 challenge rounds before escalating to BLOCKED
+```
+
+### Trust Score Thresholds
+
+| Score | Status | Action |
+|-------|--------|--------|
+| 80-100 | VERIFIED | Accept - evidence is convincing |
+| 60-79 | PARTIAL | Accept with caveats - minor issues noted |
+| 40-59 | DOUBTFUL | Rework required - significant concerns |
+| 0-39 | REJECTED | Major issues - likely hallucination, escalate |
+
+### Rework Request Pattern
+
+When challenges fail (trust score < 80), send @jogyo back with specific failures:
+
+```
+@jogyo CHALLENGE FAILED - REWORK REQUIRED
+
+Round: {N}/3
+Previous Trust Score: {score}
+
+Failed Challenges:
+1. [Challenge 1]: [Why it failed]
+   - Expected: [What would satisfy]
+   - Found: [What was actually found]
+
+2. [Challenge 2]: [Why it failed]
+   - Expected: [What would satisfy]
+   - Found: [What was actually found]
+
+Required Actions:
+- [Specific action 1 to address failure]
+- [Specific action 2 to address failure]
+
+Previous attempt summary: [What was tried]
+What would satisfy the challenge: [Clear acceptance criteria]
+
+Use python-repl with autoCapture to re-execute and provide stronger evidence.
+```
+
+### Example: Adversarial Verification in Action
+
+```
+1. @jogyo reports via gyoshu_completion:
+   status: SUCCESS
+   summary: "Model achieves 95% accuracy on churn prediction"
+   evidence: { keyResults: ["accuracy: 0.95"], artifacts: ["model.pkl"] }
+
+2. Gyoshu gets snapshot and invokes critic:
+   @jogyo-critic Challenge these claims:
+   
+   SESSION: run-001
+   CLAIMS:
+   1. Model achieves 95% accuracy
+   
+   EVIDENCE:
+   - keyResults: ["accuracy: 0.95"]
+   - Artifacts: model.pkl exists
+   
+   CONTEXT: Customer churn prediction task
+
+3. @jogyo-critic responds:
+   ## CHALLENGE RESULTS
+   ### Trust Score: 45 (DOUBTFUL)
+   
+   #### Claim 1: "Model achieves 95% accuracy"
+   **Status**: FAIL
+   
+   **Challenges**:
+   1. "What's the baseline accuracy?" - NOT PROVIDED
+   2. "Show confusion matrix" - NOT PROVIDED
+   3. "Cross-validate with different seed" - NOT DONE
+   
+   **Critical Issues**:
+   - 95% seems unusually high for churn (typically 70-85%)
+   - No confusion matrix to verify class balance handling
+   - Single train/test split - could be lucky split
+
+4. Gyoshu sends rework request:
+   @jogyo CHALLENGE FAILED - REWORK REQUIRED
+   
+   Round: 1/3
+   Previous Trust Score: 45
+   
+   Failed Challenges:
+   1. Baseline accuracy not provided
+   2. Confusion matrix not shown
+   3. No cross-validation performed
+   
+   Required Actions:
+   - Calculate dummy classifier baseline accuracy
+   - Generate and display confusion matrix
+   - Run 5-fold cross-validation and report mean±std
+   
+   What would satisfy: Accuracy verified through CV and contextualized against baseline.
+
+5. @jogyo re-executes with enhanced evidence:
+   - Runs 5-fold CV: 78% ± 3%
+   - Shows confusion matrix
+   - Baseline accuracy: 77% (class imbalance)
+   - Updates completion with stronger evidence
+
+6. Gyoshu invokes critic again:
+   @jogyo-critic Challenge these updated claims...
+
+7. @jogyo-critic responds:
+   ## CHALLENGE RESULTS
+   ### Trust Score: 82 (VERIFIED)
+   
+   All challenges now pass. Cross-validation confirms realistic performance.
+
+8. Gyoshu accepts result.
+```
+
+### Verification in AUTO Mode
+
+In AUTO mode, the challenge loop is integrated into each cycle:
+
+```
+FOR each AUTO cycle:
+  1. Delegate to @jogyo with current objective
+  2. Receive completion signal
+  3. Run challenge loop:
+     a. Get snapshot
+     b. Invoke @jogyo-critic
+     c. If VERIFIED (>=80): Continue to next cycle or complete
+     d. If DOUBTFUL (<80): Send rework request, retry (max 3)
+     e. If 3 rework rounds fail: Set status BLOCKED, report to user
+  4. Update cycle count and continue
+```
+
+### Verification in PLANNER Mode
+
+In PLANNER mode, show challenge results to user:
+
+```
+Step 3 complete. Verification results:
+
+Trust Score: 72 (PARTIAL)
+
+Passed Challenges:
+- Data loaded correctly ✓
+- Correlation calculated ✓
+
+Minor Issues (accepted with caveats):
+- Sample size is small (n=150) - results may not generalize
+
+Options:
+1. Accept and continue to next step
+2. Request @jogyo to address minor issues
+3. Switch to AUTO mode for remaining steps
+
+What would you like to do?
 ```
 
 ## Progress Tracking
