@@ -615,7 +615,6 @@ function getOrCreateLock(sessionId: string): SessionLock {
 }
 
 export default tool({
-  name: "python-repl",
   description:
     "Execute Python code in a persistent REPL environment with scientific markers. " +
     "Actions: execute (run code), interrupt (stop running code), reset (clear namespace), " +
@@ -623,92 +622,80 @@ export default tool({
     "Supports auto-capture: when notebookPath + autoCapture=true, code and outputs are " +
     "automatically appended as cells to the specified Jupyter notebook.",
 
-  parameters: {
-    type: "object",
-    properties: {
-      action: {
-        type: "string",
-        enum: ["execute", "interrupt", "reset", "get_state"],
-        description:
-          "execute: Run Python code, " +
-          "interrupt: Send interrupt to running code, " +
-          "reset: Clear execution namespace, " +
-          "get_state: Get memory usage and variables",
-      },
-      researchSessionID: {
-        type: "string",
-        description: "Unique identifier for the research session",
-      },
-      code: {
-        type: "string",
-        description: "Python code to execute (required for 'execute' action)",
-      },
-      executionLabel: {
-        type: "string",
-        description:
-          "Human-readable label for this code execution. " +
-          "Displayed in UI to help users understand the research progress. " +
-          "Examples: 'Load and profile dataset', 'Train XGBoost model', 'Generate correlation heatmap'",
-      },
-      executionTimeout: {
-        type: "number",
-        description:
-          "Timeout for code execution in milliseconds (default: 300000 = 5 min). " +
-          "After timeout, triggers SIGINT → SIGTERM → SIGKILL escalation.",
-      },
-      queueTimeout: {
-        type: "number",
-        description:
-          "Timeout for acquiring session lock in milliseconds (default: 30000 = 30 sec). " +
-          "Fails if session is busy and lock cannot be acquired within timeout.",
-      },
-      projectDir: {
-        type: "string",
-        description:
-          "Project directory containing .venv/. Defaults to current working directory.",
-      },
-      notebookPath: {
-        type: "string",
-        description:
-          "Absolute path to Jupyter notebook (.ipynb) for auto-capture. " +
-          "When provided with autoCapture=true, executed code and outputs are " +
-          "automatically appended as cells to this notebook.",
-      },
-      autoCapture: {
-        type: "boolean",
-        description:
-          "If true, automatically capture code and outputs to notebook. " +
-          "Requires notebookPath or reportTitle to be specified. Defaults to false.",
-      },
-      reportTitle: {
-        type: "string",
-        description:
-          "Title for notebook auto-capture (alternative to notebookPath). " +
-          "Computes path as: notebooks/{reportTitle}.ipynb",
-      },
-      runId: {
-        type: "string",
-        description:
-          "Current run ID for frontmatter tracking. " +
-          "When provided with auto-capture, updates the run status in notebook frontmatter.",
-      },
-    },
-    required: ["action", "researchSessionID"],
+  args: {
+    action: tool.schema
+      .enum(["execute", "interrupt", "reset", "get_state"])
+      .describe(
+        "execute: Run Python code, " +
+        "interrupt: Send interrupt to running code, " +
+        "reset: Clear execution namespace, " +
+        "get_state: Get memory usage and variables"
+      ),
+    researchSessionID: tool.schema
+      .string()
+      .describe("Unique identifier for the research session"),
+    code: tool.schema
+      .string()
+      .optional()
+      .describe("Python code to execute (required for 'execute' action)"),
+    executionLabel: tool.schema
+      .string()
+      .optional()
+      .describe(
+        "Human-readable label for this code execution. " +
+        "Displayed in UI to help users understand the research progress. " +
+        "Examples: 'Load and profile dataset', 'Train XGBoost model', 'Generate correlation heatmap'"
+      ),
+    executionTimeout: tool.schema
+      .number()
+      .optional()
+      .describe(
+        "Timeout for code execution in milliseconds (default: 300000 = 5 min). " +
+        "After timeout, triggers SIGINT → SIGTERM → SIGKILL escalation."
+      ),
+    queueTimeout: tool.schema
+      .number()
+      .optional()
+      .describe(
+        "Timeout for acquiring session lock in milliseconds (default: 30000 = 30 sec). " +
+        "Fails if session is busy and lock cannot be acquired within timeout."
+      ),
+    projectDir: tool.schema
+      .string()
+      .optional()
+      .describe("Project directory containing .venv/. Defaults to current working directory."),
+    notebookPath: tool.schema
+      .string()
+      .optional()
+      .describe(
+        "Absolute path to Jupyter notebook (.ipynb) for auto-capture. " +
+        "When provided with autoCapture=true, executed code and outputs are " +
+        "automatically appended as cells to this notebook."
+      ),
+    autoCapture: tool.schema
+      .boolean()
+      .optional()
+      .describe(
+        "If true, automatically capture code and outputs to notebook. " +
+        "Requires notebookPath or reportTitle to be specified. Defaults to false."
+      ),
+    reportTitle: tool.schema
+      .string()
+      .optional()
+      .describe(
+        "Title for notebook auto-capture (alternative to notebookPath). " +
+        "Computes path as: notebooks/{reportTitle}.ipynb"
+      ),
+    runId: tool.schema
+      .string()
+      .optional()
+      .describe(
+        "Current run ID for frontmatter tracking. " +
+        "When provided with auto-capture, updates the run status in notebook frontmatter."
+      ),
   },
 
-  async execute(args: {
-    action: "execute" | "interrupt" | "reset" | "get_state";
-    researchSessionID: string;
-    code?: string;
-    executionLabel?: string;
-    executionTimeout?: number;
-    queueTimeout?: number;
-    projectDir?: string;
-    notebookPath?: string;
-    autoCapture?: boolean;
-    reportTitle?: string;
-    runId?: string;
-  }) {
+  async execute(args) {
     const {
       action,
       researchSessionID,
