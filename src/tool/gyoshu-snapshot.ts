@@ -17,7 +17,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as crypto from "crypto";
 import { fileExists, readFile } from "../lib/atomic-write";
-import { getLegacyArtifactsDir, getLegacyManifestPath, getCheckpointDir } from "../lib/paths";
+import { getLegacyArtifactsDir, getLegacyManifestPath, getCheckpointDir, getSessionDir } from "../lib/paths";
 
 // Path resolution is handled by ../lib/paths.ts
 // Uses legacy session paths for backward compatibility with existing sessions
@@ -151,6 +151,60 @@ interface CheckpointInfo {
 }
 
 /**
+ * Record of a single challenge round in adversarial verification.
+ * Tracks trust scores and challenge outcomes from Baksa (critic).
+ */
+interface ChallengeRecord {
+  /** Challenge round number (1-indexed) */
+  round: number;
+  /** ISO 8601 timestamp when challenge was issued */
+  timestamp: string;
+  /** Trust score from Baksa (0-100) */
+  trustScore: number;
+  /** List of challenges that failed verification */
+  failedChallenges: string[];
+  /** List of challenges that passed verification */
+  passedChallenges: string[];
+}
+
+/**
+ * A single verification round in the adversarial challenge loop.
+ * Matches session-manager.ts VerificationRound.
+ */
+interface VerificationRound {
+  round: number;
+  timestamp: string;
+  trustScore: number;
+  outcome: "passed" | "failed" | "rework_requested";
+}
+
+/**
+ * Verification state from BridgeMeta.
+ * Matches session-manager.ts VerificationState.
+ */
+interface VerificationState {
+  /** Current verification round. 0 = not started, 1+ = active rounds */
+  currentRound: number;
+  /** Maximum allowed verification rounds before escalation (default: 3) */
+  maxRounds: number;
+  /** History of verification rounds (rounds are 1-indexed) */
+  history: VerificationRound[];
+}
+
+/**
+ * Bridge metadata structure.
+ * Matches session-manager.ts BridgeMeta (verification fields only).
+ */
+interface BridgeMeta {
+  sessionId: string;
+  bridgeStarted: string;
+  pythonEnv: { type: string; pythonPath: string };
+  notebookPath: string;
+  reportTitle?: string;
+  verification?: VerificationState;
+}
+
+/**
  * Complete session snapshot structure
  */
 interface SessionSnapshot {
@@ -184,6 +238,11 @@ interface SessionSnapshot {
    * Use checkpoint-manager(action: "validate") for full validation.
    */
   resumable: boolean;
+
+  challengeHistory: ChallengeRecord[];
+  /** Current challenge round. 0 = not started, 1+ = active rounds */
+  currentChallengeRound: number;
+  verificationStatus: "pending" | "in_progress" | "verified" | "failed";
 }
 
 /**
@@ -374,6 +433,84 @@ function calculateElapsedMinutes(createdAt: string): number {
   }
 }
 
+const BRIDGE_META_FILE = "bridge_meta.json";
+
+async function getSessionBridgeMeta(sessionId: string): Promise<BridgeMeta | null> {
+  try {
+    const bridgeMetaPath = path.join(getSessionDir(sessionId), BRIDGE_META_FILE);
+    if (!(await fileExists(bridgeMetaPath))) {
+      return null;
+    }
+    return await readFile<BridgeMeta>(bridgeMetaPath, true);
+  } catch {
+    return null;
+  }
+}
+
+function mapVerificationToSnapshot(verification: VerificationState | undefined): {
+  challengeHistory: ChallengeRecord[];
+  currentChallengeRound: number;
+  verificationStatus: "pending" | "in_progress" | "verified" | "failed";
+} {
+  // Defensive: return defaults if verification is missing or malformed
+  if (!verification || typeof verification !== 'object') {
+    return {
+      challengeHistory: [],
+      currentChallengeRound: 0,
+      verificationStatus: "pending",
+    };
+  }
+
+  // Defensive: ensure history is an array
+  const history = Array.isArray(verification.history) ? verification.history : [];
+  const currentRound = typeof verification.currentRound === 'number' ? verification.currentRound : 0;
+  const maxRounds = typeof verification.maxRounds === 'number' ? verification.maxRounds : 3;
+
+  // Map history with defensive checks on each entry
+  const challengeHistory: ChallengeRecord[] = history
+    .filter(round => round && typeof round === 'object')
+    .map(round => ({
+      round: typeof round.round === 'number' ? round.round : 0,
+      timestamp: typeof round.timestamp === 'string' ? round.timestamp : '',
+      trustScore: typeof round.trustScore === 'number' ? round.trustScore : 0,
+      passedChallenges: round.outcome === "passed" 
+        ? [`Round ${round.round}: Verification passed with trust score ${round.trustScore}`]
+        : [],
+      failedChallenges: (round.outcome === "failed" || round.outcome === "rework_requested")
+        ? [`Round ${round.round}: ${round.outcome === "failed" ? "Verification failed" : "Rework requested"} (trust score: ${round.trustScore})`]
+        : [],
+    }));
+
+  // Determine status with consistency check
+  let verificationStatus: "pending" | "in_progress" | "verified" | "failed";
+  
+  if (challengeHistory.length === 0) {
+    // No history - check currentRound for consistency
+    if (currentRound === 0) {
+      verificationStatus = "pending";
+    } else {
+      // Inconsistent state: currentRound > 0 but no history
+      // Treat as "in_progress" since verification started but no results yet
+      verificationStatus = "in_progress";
+    }
+  } else {
+    const latestOutcome = history[history.length - 1]?.outcome;
+    if (latestOutcome === "passed") {
+      verificationStatus = "verified";
+    } else if (currentRound >= maxRounds && latestOutcome !== "passed") {
+      verificationStatus = "failed";
+    } else {
+      verificationStatus = "in_progress";
+    }
+  }
+
+  return {
+    challengeHistory,
+    currentChallengeRound: currentRound,
+    verificationStatus,
+  };
+}
+
 export default tool({
   name: "gyoshu_snapshot",
   description:
@@ -560,6 +697,10 @@ export default tool({
     const lastActivityAt = manifest.updated || manifest.created;
     const elapsedMinutes = calculateElapsedMinutes(manifest.created);
 
+    // Read bridge metadata for verification state
+    const bridgeMeta = await getSessionBridgeMeta(researchSessionID);
+    const verificationData = mapVerificationToSnapshot(bridgeMeta?.verification);
+
     // Build complete snapshot
     const snapshot: SessionSnapshot = {
       sessionId: researchSessionID,
@@ -578,6 +719,10 @@ export default tool({
 
       lastCheckpoint,
       resumable,
+
+      challengeHistory: verificationData.challengeHistory,
+      currentChallengeRound: verificationData.currentChallengeRound,
+      verificationStatus: verificationData.verificationStatus,
     };
 
     return JSON.stringify(

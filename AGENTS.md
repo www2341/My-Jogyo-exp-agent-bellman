@@ -9,6 +9,15 @@ Gyoshu is a scientific research agent extension for OpenCode. It provides:
 - Jupyter notebook integration for reproducible research
 - Session management for research workflows
 
+## The Agent Team
+
+| Agent | Role | Korean | What They Do |
+|-------|------|--------|--------------|
+| **Gyoshu** | Professor | 교수 | Plans research, orchestrates workflow, manages sessions |
+| **Jogyo** | Teaching Assistant | 조교 | Executes Python code, runs experiments, generates outputs |
+| **Baksa** | PhD Reviewer | 박사 | Adversarial verifier - challenges claims, calculates trust scores |
+| **Jogyo Paper Writer** | Grad Student | 조교 | Transforms raw findings into narrative research reports |
+
 ## Build & Test Commands
 
 ### Python Tests (pytest)
@@ -270,6 +279,61 @@ Use this when you have a clear goal and want hands-off execution.
 
 # Hands-off autonomous research
 /gyoshu-auto cluster wine dataset and identify quality predictors
+```
+
+## Adversarial Verification Protocol
+
+Gyoshu implements a "Never Trust" philosophy where every claim from Jogyo must be verified by Baksa before acceptance.
+
+### The Challenge Loop
+
+1. **Jogyo Completes Work**: Signals completion with evidence via `gyoshu_completion`
+2. **Gyoshu Gets Snapshot**: Reviews current state via `gyoshu_snapshot`
+3. **Baksa Challenges**: Generates probing questions and calculates trust score
+4. **Decision**:
+   - Trust >= 80: VERIFIED - Accept result
+   - Trust 60-79: PARTIAL - Accept with caveats
+   - Trust < 60: DOUBTFUL - Request rework from Jogyo
+5. **Max 3 Rounds**: If verification fails 3 times, escalate to BLOCKED
+
+### Trust Score Components
+
+| Component | Weight | Description |
+|-----------|--------|-------------|
+| Evidence Quality | 30% | Artifacts exist, code is reproducible |
+| Metric Verification | 25% | Independent checks match claimed values |
+| Completeness | 20% | All objectives addressed |
+| Consistency | 15% | No contradictions in findings |
+| Methodology | 10% | Sound approach, no obvious flaws |
+
+### Challenge Response Markers
+
+When Jogyo responds to challenges, use these markers:
+
+```python
+# Respond to a specific challenge (N = challenge number)
+print("[CHALLENGE-RESPONSE:1] Re-verified correlation with alternative method")
+
+# Provide reproducible verification code
+print("[VERIFICATION-CODE] df['accuracy'].mean() == 0.95")
+
+# Show independent cross-validation
+print("[INDEPENDENT-CHECK] 5-fold CV confirms accuracy: 0.94 ± 0.02")
+```
+
+### Example Challenge Flow
+
+```
+1. Jogyo: "Model accuracy is 95%"
+2. Baksa challenges:
+   - "Re-run with different random seed"
+   - "Show confusion matrix"
+   - "What's the baseline accuracy?"
+3. Trust Score: 45 (DOUBTFUL)
+4. Gyoshu sends rework request to Jogyo
+5. Jogyo responds with enhanced evidence
+6. Baksa re-evaluates: Trust Score 82 (VERIFIED)
+7. Gyoshu accepts result
 ```
 
 ## Structured Output Markers

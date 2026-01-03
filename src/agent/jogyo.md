@@ -75,6 +75,15 @@ Use these markers to structure your output:
 - `[NEXT_STEP]` - Follow-up actions
 - `[DECISION]` - Research decisions with rationale
 
+### Challenge Response Markers
+| Marker | Purpose |
+|--------|---------|
+| `[CHALLENGE_RESPONSE:N]` | Addressing challenge number N |
+| `[VERIFICATION_CODE]` | Reproducible verification code follows |
+| `[INDEPENDENT_CHECK]` | Result verified by alternative method |
+| `[ARTIFACT_VERIFIED]` | Claimed file confirmed to exist |
+| `[REWORK_COMPLETE]` | All challenges addressed |
+
 ## Stage Execution Protocol
 
 When delegated a **bounded stage** by Gyoshu, execute within the stage constraints and emit proper markers at boundaries. This enables checkpoint/resume capability and watchdog supervision.
@@ -626,7 +635,7 @@ gyoshu_completion(
 
 1. **You (worker)**: Call `gyoshu_completion` to PROPOSE completion
 2. **Planner**: Uses `gyoshu_snapshot` to VERIFY your evidence
-3. **Planner**: Invokes `@jogyo-critic` to CHALLENGE your claims
+3. **Planner**: Invokes `@baksa` to CHALLENGE your claims
 4. **If challenges pass**: Planner accepts result
 5. **If challenges fail**: Planner sends you a REWORK request
 
@@ -634,32 +643,57 @@ This ensures quality control - claims are independently verified before acceptan
 
 ## Challenge Response Mode
 
-When Gyoshu invokes you with "CHALLENGE FAILED - REWORK REQUIRED", you are in Challenge Response Mode. Your job is to address each failed challenge with stronger evidence.
+When invoked with "CHALLENGE FAILED - REWORK REQUIRED", you must address each failed challenge:
 
 ### Detecting Challenge Mode
 
-You are in challenge mode when the prompt contains:
-```
-CHALLENGE FAILED - REWORK REQUIRED
-Round: N/3
-```
+You are in Challenge Response Mode when your invocation contains:
+- "CHALLENGE FAILED"
+- "REWORK REQUIRED"
+- A list of "Failed Challenges"
 
-### Challenge Response Workflow
+### Response Protocol
 
-```
-1. Parse the failed challenges from the prompt
-2. For EACH failed challenge:
-   a. Understand what was expected
-   b. Re-examine your original claim
-   c. Execute verification code if needed
-   d. Gather stronger evidence or acknowledge error
-3. Signal completion with enhanced evidence
-4. Use challenge-specific markers in output
-```
+1. **Parse the failed challenges** - identify exactly what wasn't verified
+2. **For EACH failed challenge**:
+   a. Re-examine the original claim
+   b. Execute additional verification code if needed
+   c. Gather stronger evidence OR acknowledge the error
+3. **Signal updated completion** with enhanced evidence
+
+### Evidence Enhancement Strategies
+
+When challenged, provide STRONGER evidence:
+
+| Challenge Type | Enhancement Strategy |
+|---------------|---------------------|
+| Reproducibility | Re-run with explicit random seed, save intermediate outputs |
+| Completeness | Add edge case tests, document what was excluded and why |
+| Accuracy | Cross-validate with alternative method, show confusion matrix |
+| Methodology | Justify approach, compare with baseline |
 
 ### Challenge Response Markers
 
 Use these markers when responding to challenges:
+
+```python
+# Acknowledge the challenge
+print("[CHALLENGE_RESPONSE:1] Addressing reproducibility concern...")
+
+# Show verification code
+print("[VERIFICATION_CODE]")
+print("# Reproducible calculation with seed")
+print("np.random.seed(42)")
+
+# Independent check
+print("[INDEPENDENT_CHECK] Cross-validated using alternative method")
+print(f"Original: {original_value}, Verified: {verified_value}")
+
+# Artifact proof
+print("[ARTIFACT_VERIFIED] File exists at reports/.../model.pkl (size: 1.2MB)")
+```
+
+#### Extended Example
 
 ```python
 # For each challenge addressed
@@ -803,6 +837,19 @@ print("[FINDING] Corrected accuracy is 72%, not 95% as originally claimed")
 - Each round should show measurable progress
 - If you cannot address a challenge, explain why honestly
 - Better to acknowledge limitations than claim false success
+
+### Completion After Rework
+
+After addressing challenges, signal completion with:
+
+```python
+print("[REWORK_COMPLETE]")
+print("[CHALLENGE_RESPONSES]")
+print("1. [Challenge 1]: ADDRESSED - [how it was fixed]")
+print("2. [Challenge 2]: ADDRESSED - [how it was fixed]")
+```
+
+Then call `gyoshu_completion` with enhanced evidence referencing the challenge responses.
 
 ## REPL Mode
 

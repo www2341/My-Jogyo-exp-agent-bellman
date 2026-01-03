@@ -22,6 +22,12 @@ interface CompletionEvidence {
   keyResults: KeyResult[];
 }
 
+interface ChallengeResponse {
+  challengeId: string;
+  response: string;
+  verificationCode?: string;
+}
+
 type CompletionStatus = "SUCCESS" | "PARTIAL" | "BLOCKED" | "ABORTED" | "FAILED";
 
 interface CompletionRecord {
@@ -142,6 +148,67 @@ function hasErrors(warnings: ValidationWarning[]): boolean {
   return warnings.some((w) => w.severity === "error");
 }
 
+function validateChallengeEvidence(
+  challengeRound: number | undefined,
+  evidence: CompletionEvidence | undefined,
+  challengeResponses: ChallengeResponse[] | undefined
+): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+
+  if (!challengeRound || challengeRound === 0) {
+    return warnings;
+  }
+
+  if (!challengeResponses || challengeResponses.length === 0) {
+    warnings.push({
+      code: "NO_CHALLENGE_RESPONSES",
+      message: `Challenge round ${challengeRound} requires challengeResponses addressing Baksa's challenges`,
+      severity: "error",
+    });
+  } else {
+    for (const resp of challengeResponses) {
+      if (!resp.challengeId || !resp.response) {
+        warnings.push({
+          code: "INCOMPLETE_CHALLENGE_RESPONSE",
+          message: `Challenge response must include challengeId and response text`,
+          severity: "error",
+        });
+        break;
+      }
+      if (resp.response.length < 20) {
+        warnings.push({
+          code: "SHALLOW_CHALLENGE_RESPONSE",
+          message: `Challenge response for '${resp.challengeId}' is too brief - provide substantive evidence`,
+          severity: "warning",
+        });
+      }
+    }
+  }
+
+  if (evidence) {
+    if (!evidence.keyResults || evidence.keyResults.length < 2) {
+      warnings.push({
+        code: "INSUFFICIENT_REWORK_RESULTS",
+        message: `Rework submission (round ${challengeRound}) requires at least 2 key results to demonstrate improvement`,
+        severity: "warning",
+      });
+    }
+
+    if (challengeResponses && challengeResponses.length > 0) {
+      const hasVerificationCode = challengeResponses.some((r) => r.verificationCode);
+      if (!hasVerificationCode) {
+        warnings.push({
+          code: "NO_VERIFICATION_CODE",
+          message: "Rework submission should include verificationCode in at least one challenge response for reproducibility",
+          severity: "warning",
+        });
+      }
+    }
+  }
+
+  return warnings;
+}
+
 // Map CompletionStatus to GoalStatus for manifest
 // The planner expects: COMPLETED | IN_PROGRESS | BLOCKED | ABORTED | FAILED
 // But completion tool uses: SUCCESS | PARTIAL | BLOCKED | ABORTED | FAILED
@@ -243,10 +310,20 @@ export default tool({
       .string()
       .optional()
       .describe("Report title for report generation (e.g., 'my-research' for notebooks/my-research.ipynb)"),
+    challengeRound: tool.schema
+      .number()
+      .optional()
+      .describe("Current challenge round (0 = initial submission, 1+ = rework submission after Baksa challenge)"),
+    challengeResponses: tool.schema
+      .any()
+      .optional()
+      .describe(
+        "Responses to specific challenges from Baksa: Array<{ challengeId: string, response: string, verificationCode?: string }>"
+      ),
   },
 
   async execute(args) {
-    const { researchSessionID, status, summary, evidence, nextSteps, blockers, exportPdf, reportTitle } = args;
+    const { researchSessionID, status, summary, evidence, nextSteps, blockers, exportPdf, reportTitle, challengeRound, challengeResponses } = args;
 
     validateSessionId(researchSessionID);
 
@@ -257,8 +334,11 @@ export default tool({
 
     const typedEvidence = evidence as CompletionEvidence | undefined;
     const typedBlockers = blockers as string[] | undefined;
+    const typedChallengeResponses = challengeResponses as ChallengeResponse[] | undefined;
 
-    const warnings = validateEvidence(status, typedEvidence, typedBlockers);
+    const baseWarnings = validateEvidence(status, typedEvidence, typedBlockers);
+    const challengeWarnings = validateChallengeEvidence(challengeRound, typedEvidence, typedChallengeResponses);
+    const warnings = [...baseWarnings, ...challengeWarnings];
     const valid = !hasErrors(warnings);
 
     const manifest = await readFile<SessionManifest>(manifestPath, true);
@@ -321,6 +401,11 @@ export default tool({
         keyResultCount: typedEvidence?.keyResults?.length ?? 0,
         artifactCount: typedEvidence?.artifactPaths?.length ?? 0,
         blockerCount: typedBlockers?.length ?? 0,
+      },
+      challengeStatus: {
+        round: challengeRound ?? 0,
+        responsesProvided: typedChallengeResponses?.length ?? 0,
+        isRework: (challengeRound ?? 0) > 0,
       },
     };
 

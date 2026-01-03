@@ -50,6 +50,34 @@ interface PythonEnvInfo {
 }
 
 /**
+ * A single verification round in the adversarial challenge loop.
+ * Tracks the outcome of each verification attempt by Baksa (critic agent).
+ */
+interface VerificationRound {
+  /** Round number (1, 2, 3, ...) */
+  round: number;
+  /** ISO 8601 timestamp of verification attempt */
+  timestamp: string;
+  /** Trust score from 0-100 calculated by Baksa (critic agent) */
+  trustScore: number;
+  /** Outcome of this verification round */
+  outcome: "passed" | "failed" | "rework_requested";
+}
+
+/**
+ * Verification state for adversarial challenge loops.
+ * Tracks the current verification round and history of all attempts.
+ */
+interface VerificationState {
+  /** Current verification round. 0 = not started, 1+ = active rounds */
+  currentRound: number;
+  /** Maximum allowed verification rounds before escalation (default: 3) */
+  maxRounds: number;
+  /** History of verification rounds (rounds are 1-indexed) */
+  history: VerificationRound[];
+}
+
+/**
  * Bridge metadata - lightweight runtime state only.
  * This is NOT durable research data - just ephemeral session state.
  */
@@ -64,6 +92,8 @@ interface BridgeMeta {
   notebookPath: string;
   /** Human-readable report title for display purposes */
   reportTitle?: string;
+  /** Adversarial verification state for challenge loops (optional, runtime only) */
+  verification?: VerificationState;
 }
 
 // ===== RUNTIME INITIALIZATION =====
@@ -108,6 +138,108 @@ function getSessionLockFilePath(sessionId: string): string {
 }
 
 // ===== VALIDATION =====
+
+/** Maximum number of verification history entries to keep */
+const MAX_VERIFICATION_HISTORY = 10;
+
+/** Valid outcomes for verification rounds */
+const VALID_OUTCOMES = ["passed", "failed", "rework_requested"] as const;
+
+/**
+ * Validates a VerificationRound object.
+ *
+ * @param round - The verification round to validate
+ * @param index - Index in history array (for error messages)
+ * @returns Error message if invalid, null if valid
+ */
+function validateVerificationRound(
+  round: unknown,
+  index: number
+): string | null {
+  if (!round || typeof round !== "object") {
+    return `history[${index}] is not an object`;
+  }
+
+  const r = round as Record<string, unknown>;
+
+  // Validate round number
+  if (typeof r.round !== "number" || !Number.isInteger(r.round) || r.round < 1) {
+    return `history[${index}].round must be a positive integer`;
+  }
+
+  // Validate timestamp
+  if (typeof r.timestamp !== "string" || r.timestamp.trim() === "") {
+    return `history[${index}].timestamp must be a non-empty string`;
+  }
+
+  // Validate trustScore (0-100)
+  if (
+    typeof r.trustScore !== "number" ||
+    r.trustScore < 0 ||
+    r.trustScore > 100
+  ) {
+    return `history[${index}].trustScore must be a number between 0 and 100`;
+  }
+
+  // Validate outcome
+  if (!VALID_OUTCOMES.includes(r.outcome as typeof VALID_OUTCOMES[number])) {
+    return `history[${index}].outcome must be one of: ${VALID_OUTCOMES.join(", ")}`;
+  }
+
+  return null;
+}
+
+/**
+ * Validates a VerificationState object.
+ *
+ * @param state - The verification state to validate
+ * @returns Error message if invalid, null if valid
+ */
+function validateVerificationState(state: unknown): string | null {
+  if (!state || typeof state !== "object") {
+    return "verification must be an object";
+  }
+
+  const s = state as Record<string, unknown>;
+
+  // Validate currentRound (non-negative integer)
+  if (
+    typeof s.currentRound !== "number" ||
+    !Number.isInteger(s.currentRound) ||
+    s.currentRound < 0
+  ) {
+    return "currentRound must be a non-negative integer";
+  }
+
+  // Validate maxRounds (positive integer >= 1)
+  if (
+    typeof s.maxRounds !== "number" ||
+    !Number.isInteger(s.maxRounds) ||
+    s.maxRounds < 1
+  ) {
+    return "maxRounds must be a positive integer >= 1";
+  }
+
+  // Validate currentRound <= maxRounds
+  if (s.currentRound > s.maxRounds) {
+    return `currentRound (${s.currentRound}) cannot exceed maxRounds (${s.maxRounds})`;
+  }
+
+  // Validate history is an array
+  if (!Array.isArray(s.history)) {
+    return "history must be an array";
+  }
+
+  // Validate each history entry
+  for (let i = 0; i < s.history.length; i++) {
+    const error = validateVerificationRound(s.history[i], i);
+    if (error) {
+      return error;
+    }
+  }
+
+  return null;
+}
 
 /**
  * Validates that a session ID is safe to use in file paths.
@@ -182,7 +314,8 @@ export default tool({
       .optional()
       .describe(
         "Bridge metadata for create/update operations. Can include: " +
-        "pythonEnv (type, pythonPath), notebookPath, reportTitle"
+        "pythonEnv (type, pythonPath), notebookPath, reportTitle, " +
+        "verification (currentRound, maxRounds, history)"
       ),
   },
 
@@ -349,6 +482,19 @@ export default tool({
         const existing = await readFile<BridgeMeta>(bridgeMetaPath, true);
         const updateData = args.data as Partial<BridgeMeta> | undefined;
 
+        let sanitizedVerification: VerificationState | undefined = undefined;
+        if (updateData?.verification !== undefined) {
+          const validationError = validateVerificationState(updateData.verification);
+          if (validationError) {
+            throw new Error(`Invalid verification state: ${validationError}`);
+          }
+          const verif = updateData.verification as VerificationState;
+          sanitizedVerification = {
+            ...verif,
+            history: verif.history.slice(-MAX_VERIFICATION_HISTORY),
+          };
+        }
+
         const updated: BridgeMeta = {
           ...existing,
           ...(updateData?.notebookPath !== undefined && {
@@ -356,6 +502,9 @@ export default tool({
           }),
           ...(updateData?.reportTitle !== undefined && {
             reportTitle: updateData.reportTitle,
+          }),
+          ...(sanitizedVerification !== undefined && {
+            verification: sanitizedVerification,
           }),
           sessionId: existing.sessionId,
           bridgeStarted: existing.bridgeStarted,

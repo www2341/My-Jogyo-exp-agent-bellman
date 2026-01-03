@@ -20,22 +20,43 @@ This command runs in **AUTO mode** - bounded autonomous execution that:
 2. Runs a bounded loop: delegate to @jogyo → **verify with @baksa** → check completion
 3. Continues until goal is COMPLETED, BLOCKED (needs user input), or budget exhausted
 
-### Adversarial Verification Loop
+## Adversarial Verification in AUTO Mode
 
-Every cycle includes mandatory verification by @baksa (the PhD reviewer):
+**CRITICAL: The AUTO loop includes mandatory verification via @baksa**
 
-```
-FOR each cycle:
-  1. Delegate task to @jogyo
-  2. Receive completion signal
-  3. CHALLENGE LOOP (max 3 rounds):
-     a. Get snapshot of evidence
-     b. Invoke @baksa to challenge claims
-     c. If trust score >= 80: ACCEPT, continue
-     d. If trust score < 80: REWORK request to @jogyo
-     e. If 3 rounds fail: Mark BLOCKED, report to user
-  4. Increment cycle, continue to next objective
-```
+After EVERY @jogyo completion, execute the challenge loop:
+
+### Challenge Loop (Max 3 Rounds)
+
+1. **Get Snapshot**: `gyoshu_snapshot(researchSessionID: "...")`
+2. **Invoke Critic**: `@baksa Challenge these claims with evidence: [from snapshot]`
+3. **Evaluate Trust Score**:
+   - **80-100 (VERIFIED)**: Accept result, continue to next cycle
+   - **60-79 (PARTIAL)**: Accept with caveats, note limitations
+   - **40-59 (DOUBTFUL)**: Send rework request to @jogyo
+   - **0-39 (REJECTED)**: Escalate to BLOCKED status
+
+4. **If Rework Needed**:
+   ```
+   @jogyo CHALLENGE FAILED - REWORK REQUIRED (Round N/3)
+   
+   Failed Challenges:
+   - [List from @baksa]
+   
+   Required: Address each challenge with evidence
+   ```
+
+5. **If Round 3 Fails**: 
+   - Set goalStatus to BLOCKED
+   - Report to user with challenge history
+   - Do NOT continue autonomous execution
+
+### Budget Impact
+
+Challenge rounds count toward the cycle budget:
+- Each @baksa invocation = 0.5 cycle cost
+- Each @jogyo rework = 1 cycle cost
+- Plan accordingly: a single task may consume 3-4 cycles with verification
 
 This ensures research quality through systematic skepticism - no claim passes without verification.
 
