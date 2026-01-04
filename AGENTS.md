@@ -332,11 +332,20 @@ Gyoshu implements a "Never Trust" philosophy where every claim from Jogyo must b
 
 | Component | Weight | Description |
 |-----------|--------|-------------|
-| Evidence Quality | 30% | Artifacts exist, code is reproducible |
-| Metric Verification | 25% | Independent checks match claimed values |
-| Completeness | 20% | All objectives addressed |
-| Consistency | 15% | No contradictions in findings |
-| Methodology | 10% | Sound approach, no obvious flaws |
+| Statistical Rigor | 30% | CI reported, effect size calculated, assumptions checked |
+| Evidence Quality | 25% | Artifacts exist, code is reproducible |
+| Metric Verification | 20% | Independent checks match claimed values |
+| Completeness | 15% | All objectives addressed |
+| Methodology | 10% | Sound approach, appropriate tests |
+
+### Automatic Rejection Triggers
+
+The following immediately reduce trust score by 30 points:
+- `[FINDING]` without accompanying `[STAT:ci]`
+- `[FINDING]` without accompanying `[STAT:effect_size]`
+- "Significant" claim without p-value
+- Correlation claim without effect size interpretation
+- ML metrics without baseline comparison
 
 ### Challenge Response Markers
 
@@ -368,27 +377,170 @@ print("[INDEPENDENT-CHECK] 5-fold CV confirms accuracy: 0.94 ± 0.02")
 7. Gyoshu accepts result
 ```
 
+## Research Quality Standards
+
+Gyoshu enforces **senior data scientist level** research quality through hard quality gates. Every claim must have statistical evidence before becoming a verified finding.
+
+### The Claim Contract
+
+Every finding must include:
+```
+Claim → Data slice → Method/Test → Assumptions → 
+Estimate + CI → Effect size → p-value → Robustness checks → 
+Practical "so what"
+```
+
+### Quality Gates
+
+| Gate | Requirement | Consequence if Missing |
+|------|-------------|------------------------|
+| Hypothesis | H0/H1 stated before analysis | Finding marked "exploratory" |
+| Confidence Interval | 95% CI reported | Finding rejected |
+| Effect Size | Cohen's d, r², or OR reported | Finding rejected |
+| Assumptions | Statistical assumptions checked | Warning flag |
+| Robustness | At least one sensitivity check | Warning flag |
+| So What | Practical significance explained | Finding incomplete |
+
+### Finding Categories
+
+| Category | Trust Score | Report Section |
+|----------|-------------|----------------|
+| **Verified Findings** | ≥ 80 | Key Findings |
+| **Partial Findings** | 60-79 | Findings (with caveats) |
+| **Exploratory Notes** | < 60 | Exploratory Observations |
+
 ## Structured Output Markers
 
 When working with Gyoshu REPL output, use these markers:
 
+### Research Process Markers
+
 ```python
 # Research Process
 print("[OBJECTIVE] Research goal statement")
-print("[HYPOTHESIS] Proposed explanation")
-print("[CONCLUSION] Final conclusions")
+print("[HYPOTHESIS] H0: no effect; H1: treatment improves outcome")
+print("[CONCLUSION] Final conclusions with evidence summary")
+```
 
-# Data Operations
+### Statistical Evidence Markers (REQUIRED for Findings)
+
+```python
+# Test Decision - explain why this test
+print("[DECISION] Using Welch's t-test: two independent groups, unequal variance")
+
+# Assumption Checking
+print("[CHECK:normality] Shapiro-Wilk p=0.23 - normality assumption OK")
+print("[CHECK:homogeneity] Levene's p=0.04 - using Welch's (unequal var)")
+
+# Statistical Results (ALL required before [FINDING])
+print(f"[STAT:estimate] mean_diff = {mean_diff:.3f}")
+print(f"[STAT:ci] 95% CI [{ci_low:.3f}, {ci_high:.3f}]")
+print(f"[STAT:effect_size] Cohen's d = {d:.3f} (medium)")
+print(f"[STAT:p_value] p = {p:.4f}")
+
+# Robustness Check
+print("[INDEPENDENT_CHECK] Bootstrap 95% CI: [0.12, 0.28] - consistent")
+
+# Only AFTER above evidence:
+print("[FINDING] Treatment shows medium effect (d=0.45, 95% CI [0.2, 0.7])")
+
+# Practical Significance
+print("[SO_WHAT] Effect translates to $50K annual savings per customer segment")
+
+# Limitations
+print("[LIMITATION] Self-selection bias - users opted in voluntarily")
+```
+
+### ML Pipeline Markers
+
+```python
+# Baseline (REQUIRED before claiming model performance)
+print(f"[METRIC:baseline_accuracy] {dummy_score:.3f}")
+
+# Cross-Validation (REQUIRED - report mean ± std)
+print(f"[METRIC:cv_accuracy_mean] {scores.mean():.3f}")
+print(f"[METRIC:cv_accuracy_std] {scores.std():.3f}")
+
+# Model Performance with CI
+print(f"[STAT:ci] 95% CI [{ci_low:.3f}, {ci_high:.3f}]")
+print(f"[METRIC:improvement_over_baseline] {improvement:.3f}")
+
+# Interpretation (REQUIRED)
+print("[METRIC:top_features] age (0.23), income (0.18), tenure (0.15)")
+print("[FINDING] Random Forest (AUC=0.82) outperforms baseline (0.65) by 0.17")
+print("[SO_WHAT] Model identifies 80% of churners in top 20% of predictions")
+```
+
+### Data Operations Markers
+
+```python
 print("[DATA] Dataset description")
 print(f"[SHAPE] {df.shape}")
+print(f"[METRIC:missing_rate] {missing_pct:.1f}%")
+```
 
-# Metrics
-print(f"[METRIC:accuracy] {accuracy:.4f}")
-print(f"[STAT:mean] {value:.2f}")
+### Legacy Markers (Still Supported)
 
-# Insights
-print("[FINDING] Key discovery")
+```python
 print("[PATTERN] Identified pattern")
+print("[OBSERVATION] Descriptive observation")
+print("[EXPERIMENT] Experimental setup description")
+```
+
+### Complete Statistical Analysis Example
+
+```python
+import numpy as np
+from scipy.stats import ttest_ind, shapiro, levene
+
+# 1. State hypothesis
+print("[HYPOTHESIS] H0: No difference between groups; H1: Treatment > Control")
+print("[DECISION] Using Welch's t-test for independent samples")
+
+# 2. Check assumptions
+_, p_norm_t = shapiro(treatment)
+_, p_norm_c = shapiro(control)
+print(f"[CHECK:normality] Treatment p={p_norm_t:.3f}, Control p={p_norm_c:.3f}")
+
+_, p_var = levene(treatment, control)
+print(f"[CHECK:homogeneity] Levene's p={p_var:.3f} - using Welch's t-test")
+
+# 3. Run test
+t_stat, p_value = ttest_ind(treatment, control, equal_var=False)
+
+# 4. Calculate effect size (Cohen's d)
+pooled_std = np.sqrt(((len(treatment)-1)*treatment.std()**2 + 
+                       (len(control)-1)*control.std()**2) / 
+                      (len(treatment) + len(control) - 2))
+cohens_d = (treatment.mean() - control.mean()) / pooled_std
+
+# 5. Calculate CI for difference
+from scipy.stats import sem
+mean_diff = treatment.mean() - control.mean()
+se_diff = np.sqrt(sem(treatment)**2 + sem(control)**2)
+ci_low = mean_diff - 1.96 * se_diff
+ci_high = mean_diff + 1.96 * se_diff
+
+# 6. Report ALL statistics
+print(f"[STAT:estimate] mean_diff = {mean_diff:.3f}")
+print(f"[STAT:ci] 95% CI [{ci_low:.3f}, {ci_high:.3f}]")
+print(f"[STAT:effect_size] Cohen's d = {cohens_d:.3f} ({'small' if abs(cohens_d) < 0.5 else 'medium' if abs(cohens_d) < 0.8 else 'large'})")
+print(f"[STAT:p_value] p = {p_value:.4f}")
+
+# 7. Robustness check
+from scipy.stats import mannwhitneyu
+_, p_mw = mannwhitneyu(treatment, control, alternative='greater')
+print(f"[INDEPENDENT_CHECK] Mann-Whitney U p={p_mw:.4f} (non-parametric confirmation)")
+
+# 8. NOW state finding with full evidence
+print(f"[FINDING] Treatment shows {'significant' if p_value < 0.05 else 'no significant'} effect "
+      f"(d={cohens_d:.2f}, 95% CI [{ci_low:.2f}, {ci_high:.2f}], p={p_value:.4f})")
+
+# 9. Practical significance
+print(f"[SO_WHAT] A {abs(cohens_d):.1f}σ effect means ~{abs(mean_diff)*100:.0f} unit improvement per customer")
+
+# 10. Limitations
+print("[LIMITATION] Single time point; longitudinal effects unknown")
 ```
 
 ## Report Generation
@@ -408,6 +560,23 @@ Reports are generated by extracting structured markers from notebook cell output
 | `[LIMITATION]` | Limitations | Known constraints |
 | `[NEXT_STEP]` | Recommended Next Steps | Follow-up actions |
 | `[CONCLUSION]` | Conclusion | Final summary |
+
+### IMRAD Report Structure
+
+Reports follow the IMRAD (Introduction, Methods, Results, Analysis, Discussion) structure:
+
+| Section | Content | Required Markers |
+|---------|---------|------------------|
+| **Executive Summary** | Question, answer, magnitude, confidence | `[OBJECTIVE]`, `[CONCLUSION]` |
+| **Hypotheses & Endpoints** | H0/H1, metrics, alpha | `[HYPOTHESIS]`, `[DECISION]` |
+| **Methods** | Data, tests, assumptions | `[DATA]`, `[CHECK:*]` |
+| **Results** | Estimates + CI + effect sizes | `[STAT:*]`, `[METRIC:*]` |
+| **Robustness** | Sensitivity analyses | `[INDEPENDENT_CHECK]` |
+| **Key Findings** | Verified discoveries (trust ≥ 80) | `[FINDING]` + `[STAT:ci]` + `[STAT:effect_size]` |
+| **Exploratory Observations** | Unverified claims (trust < 80) | `[FINDING]` without full stats |
+| **Implications ("So What")** | Practical significance | `[SO_WHAT]` |
+| **Limitations** | Threats to validity | `[LIMITATION]` |
+| **Next Steps** | Follow-up actions | `[NEXT_STEP]` |
 
 ### Automatic Report Generation
 

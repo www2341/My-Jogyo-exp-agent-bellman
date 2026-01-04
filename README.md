@@ -246,14 +246,34 @@ your-project/
 
 The TA uses structured markers to organize research output:
 
+### Core Markers
+
 | Marker | Purpose | Example |
 |--------|---------|---------|
 | `[OBJECTIVE]` | Research goal | `[OBJECTIVE] Classify iris species` |
-| `[HYPOTHESIS]` | What you're testing | `[HYPOTHESIS] Petal length is most predictive` |
+| `[HYPOTHESIS]` | What you're testing | `[HYPOTHESIS] H0: no difference; H1: petal length predicts species` |
 | `[DATA]` | Dataset info | `[DATA] Loaded 150 samples` |
-| `[METRIC:name]` | Quantitative results | `[METRIC:accuracy] 0.95` |
-| `[FINDING]` | Key discovery | `[FINDING] Setosa is linearly separable` |
-| `[CONCLUSION]` | Final verdict | `[CONCLUSION] Hypothesis confirmed` |
+| `[FINDING]` | Key discovery | `[FINDING] Setosa is linearly separable (d=2.1, p<0.001)` |
+| `[CONCLUSION]` | Final verdict | `[CONCLUSION] Hypothesis confirmed with large effect` |
+
+### Statistical Evidence Markers (Required for Verified Findings)
+
+| Marker | Purpose | Example |
+|--------|---------|---------|
+| `[STAT:ci]` | Confidence interval | `[STAT:ci] 95% CI [0.82, 0.94]` |
+| `[STAT:effect_size]` | Effect magnitude | `[STAT:effect_size] Cohen's d = 0.75 (medium)` |
+| `[STAT:p_value]` | Statistical significance | `[STAT:p_value] p = 0.003` |
+| `[SO_WHAT]` | Practical significance | `[SO_WHAT] This means 15% cost reduction` |
+| `[LIMITATION]` | Threats to validity | `[LIMITATION] Small sample size (n=50)` |
+
+### ML Pipeline Markers
+
+| Marker | Purpose | Example |
+|--------|---------|---------|
+| `[METRIC:baseline_*]` | Dummy model benchmark | `[METRIC:baseline_accuracy] 0.33` |
+| `[METRIC:cv_*]` | Cross-validation scores | `[METRIC:cv_accuracy_mean] 0.95` |
+
+> **Quality Gate**: Findings without `[STAT:ci]` and `[STAT:effect_size]` are marked as "Exploratory" in reports.
 
 ---
 
