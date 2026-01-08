@@ -47,6 +47,8 @@ Think of it like a research lab:
 
 ## 🚀 Installation
 
+### Option 1: OpenCode Plugin (Recommended)
+
 Add Gyoshu to your `opencode.json`:
 
 ```json
@@ -55,12 +57,25 @@ Add Gyoshu to your `opencode.json`:
 }
 ```
 
-That's it! OpenCode will auto-install Gyoshu via Bun on next startup.
+That's it! OpenCode will auto-install Gyoshu from npm on next startup.
+
+### Option 2: CLI Installer
+
+```bash
+# Using bunx (no global install needed)
+bunx gyoshu install
+
+# Or install globally first
+npm install -g gyoshu
+gyoshu install
+```
+
+The CLI automatically adds Gyoshu to your `opencode.json`.
 
 <details>
-<summary>📦 Development installation</summary>
+<summary>📦 Development installation (for contributors)</summary>
 
-**Clone & link locally** (for contributors)
+**Clone & link locally:**
 ```bash
 git clone https://github.com/Yeachan-Heo/My-Jogyo.git
 cd My-Jogyo && bun install
@@ -77,6 +92,10 @@ Then in your `opencode.json`:
 
 **Verify installation:**
 ```bash
+# Check status via CLI
+bunx gyoshu check
+
+# Or in OpenCode
 opencode
 /gyoshu doctor
 ```
@@ -87,7 +106,7 @@ opencode
 
 > *Using Claude, GPT, Gemini, or another AI assistant with OpenCode? This section is for you.*
 
-**Setup is the same** — add `"gyoshu"` to your plugin array, then give your LLM the context it needs:
+**Setup is the same** — run `bunx gyoshu install` or add `"gyoshu"` to your plugin array. Then give your LLM the context it needs:
 
 1. **Point your LLM to the guide:**
    > "Read `AGENTS.md` in the Gyoshu directory for full context on how to use the research tools."
@@ -357,15 +376,25 @@ python3 -m venv .venv
 
 ## 🔄 Updating
 
-OpenCode automatically updates plugins. To force an update, remove the cached version:
+Gyoshu is distributed via npm. OpenCode automatically handles plugin updates.
 
+**Force update:**
 ```bash
+# Clear OpenCode's cache
 rm -rf ~/.cache/opencode/node_modules/gyoshu
+
+# Or reinstall with latest version
+bunx gyoshu@latest install
 ```
 
 Then restart OpenCode.
 
-Verify: `opencode` then `/gyoshu doctor`
+**Verify:** `opencode` then `/gyoshu doctor`
+
+**Uninstall:**
+```bash
+bunx gyoshu uninstall
+```
 
 See [CHANGELOG.md](CHANGELOG.md) for what's new.
 
