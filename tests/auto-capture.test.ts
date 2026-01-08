@@ -8,14 +8,26 @@ import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import * as fs from "fs/promises";
 import * as path from "path";
 import * as os from "os";
+import { clearProjectRootCache } from "../src/lib/paths";
 
 let tempDir: string;
+let originalProjectRoot: string | undefined;
 
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "auto-capture-test-"));
+  originalProjectRoot = process.env.GYOSHU_PROJECT_ROOT;
+  process.env.GYOSHU_PROJECT_ROOT = tempDir;
+  clearProjectRootCache();
+  await fs.mkdir(path.join(tempDir, "notebooks"), { recursive: true });
 });
 
 afterEach(async () => {
+  if (originalProjectRoot !== undefined) {
+    process.env.GYOSHU_PROJECT_ROOT = originalProjectRoot;
+  } else {
+    delete process.env.GYOSHU_PROJECT_ROOT;
+  }
+  clearProjectRootCache();
   if (tempDir) {
     await fs.rm(tempDir, { recursive: true, force: true });
   }
@@ -162,7 +174,7 @@ describe("Auto-Capture: appendCodeCellToNotebook", () => {
   const { appendCodeCellToNotebook } = require("../src/tool/python-repl.ts");
 
   test("creates new notebook when file doesn't exist", async () => {
-    const notebookPath = path.join(tempDir, "new-notebook.ipynb");
+    const notebookPath = path.join(tempDir, "notebooks", "new-notebook.ipynb");
     const code = "print('hello')";
     const outputs = [
       { output_type: "stream", name: "stdout", text: ["hello\n"] },
@@ -192,7 +204,7 @@ describe("Auto-Capture: appendCodeCellToNotebook", () => {
   });
 
   test("appends to existing notebook", async () => {
-    const notebookPath = path.join(tempDir, "existing-notebook.ipynb");
+    const notebookPath = path.join(tempDir, "notebooks", "existing-notebook.ipynb");
     const existingNotebook = {
       cells: [
         {
@@ -232,7 +244,7 @@ describe("Auto-Capture: appendCodeCellToNotebook", () => {
   });
 
   test("creates parent directories if needed", async () => {
-    const notebookPath = path.join(tempDir, "nested", "dir", "notebook.ipynb");
+    const notebookPath = path.join(tempDir, "notebooks", "nested", "dir", "notebook.ipynb");
 
     const result = await appendCodeCellToNotebook(
       notebookPath,
@@ -248,7 +260,7 @@ describe("Auto-Capture: appendCodeCellToNotebook", () => {
   });
 
   test("handles multiline code", async () => {
-    const notebookPath = path.join(tempDir, "multiline.ipynb");
+    const notebookPath = path.join(tempDir, "notebooks", "multiline.ipynb");
     const code = "def greet(name):\n    return f'Hello, {name}'\n\nprint(greet('World'))";
 
     const result = await appendCodeCellToNotebook(
@@ -272,7 +284,7 @@ describe("Auto-Capture: appendCodeCellToNotebook", () => {
   });
 
   test("includes autoCaptured metadata", async () => {
-    const notebookPath = path.join(tempDir, "metadata.ipynb");
+    const notebookPath = path.join(tempDir, "notebooks", "metadata.ipynb");
 
     await appendCodeCellToNotebook(
       notebookPath,

@@ -27,6 +27,8 @@ const ALLOWED_CATEGORIES = new Set([
 
 const SAFE_FILENAME_REGEX = /^[a-zA-Z0-9._/-]+$/;
 const SAFE_DIRNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
+const DISALLOWED_TEST_FILE_REGEX = /\.(test|spec)\.[cm]?[jt]sx?$/i;
+const DISALLOWED_TEST_PATH_SEGMENTS = new Set(["test", "tests", "__test__", "__tests__"]);
 const LOCK_STALE_MS = 5 * 60 * 1000;
 const LOCK_MAX_RETRIES = 3;
 
@@ -58,23 +60,54 @@ function getPackageRoot(): string {
 
 function isValidPath(category: string, file: string): boolean {
   if (!ALLOWED_CATEGORIES.has(category)) return false;
-  if (!file || path.isAbsolute(file)) return false;
-  const segments = file.split(/[/\\]/);
+
+  if (category === "skill") return false;
+
+  if (!file) return false;
+
+  const normalizedPosix = file.replace(/\\/g, "/");
+  if (path.isAbsolute(normalizedPosix)) return false;
+  if (!SAFE_FILENAME_REGEX.test(normalizedPosix)) return false;
+
+  const segments = normalizedPosix.split("/");
   if (segments.every(s => !s)) return false;
+
+  const baseName = path.posix.basename(normalizedPosix).toLowerCase();
+  if (DISALLOWED_TEST_FILE_REGEX.test(baseName)) return false;
+
   for (const segment of segments) {
     if (!segment) continue;
+    if (DISALLOWED_TEST_PATH_SEGMENTS.has(segment.toLowerCase())) return false;
     try {
       validatePathSegment(segment, "pathSegment");
     } catch {
       return false;
     }
   }
-  const normalized = path.normalize(file);
+
+  const normalized = path.posix.normalize(normalizedPosix);
   if (normalized === "." || normalized.startsWith("..")) return false;
-  return true;
+
+  const lower = normalized.toLowerCase();
+  switch (category) {
+    case "agent":
+    case "command":
+      return lower.endsWith(".md");
+    case "tool":
+    case "lib":
+    case "plugin":
+      return lower.endsWith(".ts");
+    case "bridge":
+      return lower.endsWith(".py");
+    default:
+      return false;
+  }
 }
 
 function isValidSkillName(name: string): boolean {
+  if (!SAFE_DIRNAME_REGEX.test(name)) return false;
+  if (DISALLOWED_TEST_PATH_SEGMENTS.has(name.toLowerCase())) return false;
+
   try {
     validatePathSegment(name, "skillName");
     return true;
